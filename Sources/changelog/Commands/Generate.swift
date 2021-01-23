@@ -71,7 +71,7 @@ struct Generate: ParsableCommand {
             owner: owner,
             repo: repo,
             token: token,
-            labels: labels.components(separatedBy: ","),
+            labels: labels.isEmpty ? [] : labels.components(separatedBy: ","),
             filterRegEx: filterRegEx,
             maximumNumberOfPages: maxPages,
             nextTag: nextTag,
