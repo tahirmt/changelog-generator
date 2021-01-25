@@ -1,4 +1,9 @@
 
+#v1.0.2
+------
+
+- [#9](https://github.com/tahirmt/changelog-generator/pull/9): Add create release action by [tahirmt](https://github.com/tahirmt)
+
 #v1.0.1
 ------
 
