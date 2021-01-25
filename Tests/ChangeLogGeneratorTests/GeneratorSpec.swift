@@ -18,9 +18,8 @@ final class GeneratorSpec: QuickSpec {
 
             context("when fetching all pages") {
                 beforeEach {
-                    subject = Generator(
-                        owner: "AFNetworking",
-                        repo: "AFNetworking",
+                    subject = try! Generator(
+                        repository: "AFNetworking/AFNetworking",
                         token: nil,
                         labels: [],
                         filterRegEx: nil,
@@ -109,9 +108,8 @@ final class GeneratorSpec: QuickSpec {
 
             context("when initialized with token") {
                 beforeEach {
-                    subject = Generator(
-                        owner: "AFNetworking",
-                        repo: "AFNetworking",
+                    subject = try! Generator(
+                        repository: "AFNetworking/AFNetworking",
                         token: "123456789asdfghjkl",
                         labels: [],
                         filterRegEx: nil,
@@ -182,9 +180,8 @@ final class GeneratorSpec: QuickSpec {
 
                 context("when filter regex is provided") {
                     beforeEach {
-                        subject = Generator(
-                            owner: "AFNetworking",
-                            repo: "AFNetworking",
+                        subject = try! Generator(
+                            repository: "AFNetworking/AFNetworking",
                             token: nil,
                             labels: [],
                             filterRegEx: "Fixed CLANG_ENABLE_CODE_COVERAGE flag so release can be made",
@@ -218,6 +215,19 @@ final class GeneratorSpec: QuickSpec {
                         expect(changelog?.contains("Fixed CLANG_ENABLE_CODE_COVERAGE flag so release can be made")).to(beFalse())
                     }
                 }
+            }
+
+            it("should not initialize if repository name does not match format") {
+                expect {
+                    subject = try Generator(
+                        repository: "hello",
+                        token: nil,
+                        labels: [],
+                        filterRegEx: nil,
+                        maximumNumberOfPages: nil,
+                        nextTag: nil,
+                        includeUntagged: true)
+                }.to(throwError())
             }
         }
     }

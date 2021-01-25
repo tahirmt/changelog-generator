@@ -31,11 +31,8 @@ struct Generate: ParsableCommand {
         abstract: "Generate a changelog"
     )
 
-    @Option(help: "The owner of the repo")
-    var owner: String
-
-    @Option(help: "The repo name")
-    var repo: String
+    @Option(help: "The repository in the format of owner/repository")
+    var repository: String
 
     @Option(help: "The Github token to access the repo. It is a personal access token required for private repositories.")
     var token: String?
@@ -67,9 +64,8 @@ struct Generate: ParsableCommand {
     // MARK: - ParsableCommand
 
     func run() throws {
-        let generator = Generator(
-            owner: owner,
-            repo: repo,
+        let generator = try Generator(
+            repository: repository,
             token: token,
             labels: labels.isEmpty ? [] : labels.components(separatedBy: ","),
             filterRegEx: filterRegEx,

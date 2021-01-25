@@ -17,7 +17,7 @@ final class GitHubSpec: QuickSpec {
             var subject: GitHub!
 
             beforeEach {
-                subject = GitHub(owner: "umbrellacorp", repo: "virus", token: "1234567", params: ["id": "123"])
+                subject = GitHub(repository: "umbrellacorp/virus", token: "1234567", params: ["id": "123"])
             }
 
             it("should fetch all pages") {

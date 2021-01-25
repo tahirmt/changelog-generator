@@ -18,8 +18,7 @@ struct GitHub {
     // MARK: Properties
 
     let base = "https://api.github.com"
-    let owner: String
-    let repo: String
+    let repository: String
     let token: String?
     private(set) var params: [String: String] = [:]
     private(set) var session: URLSession = .shared
@@ -38,8 +37,7 @@ struct GitHub {
             return [
                 base,
                 "repos",
-                owner,
-                repo,
+                repository,
                 endpoint.rawValue,
             ].joined(separator: "/")
         case .search:
@@ -134,7 +132,7 @@ struct GitHub {
         }
 
         let query = [
-            "repo:\(owner)/\(repo)",
+            "repo:\(repository)",
             "is:pr",
             "is:merged",
             "merged:>=\(DateFormatter.formatter.string(from: date))"
