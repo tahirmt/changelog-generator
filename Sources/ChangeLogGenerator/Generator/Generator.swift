@@ -1,8 +1,11 @@
 import Foundation
 
+enum GeneratorError: Error {
+    case invalidFormat
+}
+
 public struct Generator {
-    let owner: String
-    let repo: String
+    let repository: String
     let token: String?
     let labels: [String]
     let filterRegEx: String?
@@ -13,16 +16,19 @@ public struct Generator {
 
     // MARK: Initialization
 
-    public init(owner: String,
-                repo: String,
+    public init(repository: String,
                 token: String?,
                 labels: [String],
                 filterRegEx: String?,
                 maximumNumberOfPages: Int?,
                 nextTag: String?,
-                includeUntagged: Bool) {
-        self.owner = owner
-        self.repo = repo
+                includeUntagged: Bool) throws {
+        let regex = try NSRegularExpression(pattern: "(([a-zA-Z]{1,})/([a-zA-Z]{1,}))")
+        guard repository.matches(regularExpression: regex) else {
+            throw GeneratorError.invalidFormat
+        }
+
+        self.repository = repository
         self.token = token
         self.labels = labels
         self.filterRegEx = filterRegEx
@@ -39,7 +45,7 @@ public struct Generator {
     public func generateChangeLogSinceLatestRelease(completion: @escaping (Result<String, Error>) -> Void) {
 
         // get the latest release
-        GitHub(owner: owner, repo: repo, token: token)
+        GitHub(repository: repository, token: token)
             .fetchLatestRelease { (result: Result<Release, APIError>) in
                 switch result {
                 case .failure(let error):
@@ -51,7 +57,7 @@ public struct Generator {
                     }
 
                     // fetch pull requests since the release
-                    GitHub(owner: self.owner, repo: self.repo, token: self.token)
+                    GitHub(repository: self.repository, token: self.token)
                         .fetchPullRequests(mergedAfter: released, maximumNumberOfPages: maximumNumberOfPages) { pullRequestResult in
                             switch pullRequestResult {
                             case .failure(let error):
@@ -71,7 +77,7 @@ public struct Generator {
     ///   - maximumNumberOfPages: maximum number of pages to load
     ///   - completion: will finish with a changelog string
     public func generateChangeLogSince(tag: String, completion: @escaping (Result<String, Error>) -> Void) {
-        GitHub(owner: self.owner, repo: self.repo, token: self.token)
+        GitHub(repository: repository, token: token)
             .fetch(from: .tags, maximumNumberOfPages: maximumNumberOfPages) { (tags: [Tag]) -> Bool in
                 tags.contains(where: { $0.name == tag })
             } completionHandler: { (result: Result<[Tag], APIError>) in
@@ -90,7 +96,7 @@ public struct Generator {
                         filteredTags.append(allTags.removeFirst())
                     }
 
-                    GitHub(owner: owner, repo: repo, token: token, params: ["state": "closed"])
+                    GitHub(repository: repository, token: token, params: ["state": "closed"])
                         .fetch(from: .pulls, maximumNumberOfPages: maximumNumberOfPages) { (pulls: [PullRequest]) -> Bool in
                             pulls.contains { $0.mergeCommitSha == tag.commit.sha } == false
                         } completionHandler: { (result: Result<[PullRequest], APIError>) in
@@ -124,7 +130,7 @@ public struct Generator {
         var anyError: Error?
 
         group.enter()
-        GitHub(owner: owner, repo: repo, token: token)
+        GitHub(repository: repository, token: token)
             .fetch(from: .tags, maximumNumberOfPages: maximumNumberOfPages) { (result: Result<[Tag], APIError>) in
                 switch result {
                 case .success(let tags):
@@ -136,7 +142,7 @@ public struct Generator {
         }
 
         group.enter()
-        GitHub(owner: owner, repo: repo, token: token, params: ["state": "closed"])
+        GitHub(repository: repository, token: token, params: ["state": "closed"])
             .fetch(from: .pulls, maximumNumberOfPages: maximumNumberOfPages) { (result: Result<[PullRequest], APIError>) in
                 switch result {
                 case .success(let pulls):
