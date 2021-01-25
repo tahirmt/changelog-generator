@@ -17,8 +17,8 @@ jobs:
       working-directory: Sources
       run: |
         # expecting Create release <tag-version>
-        title=${{ github.event.pull_request.title }}
-        tag=${title:15}
+        title="${{ github.event.pull_request.title }}"
+        tag="${title:15}"
 
         echo "::set-output name=tag::$tag"
 
