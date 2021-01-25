@@ -1,0 +1,44 @@
+# This is a basic workflow that is manually triggered
+
+name: Update Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+
+jobs:
+  update-changelog:
+    runs-on: macos-latest
+
+    steps:
+    - name: Check Acccess
+      uses: sushichop/action-repository-permission@v1
+      with:
+        required-permission: admin
+
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Create branch
+      run: git checkout -b create-release
+      
+    - name: Update changelog
+      run: |
+        ./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
+    
+    - name: Push branch
+      run: |
+        git push origin create-release --force 
+    
+    - name: Create PR
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: create-release
+        base: main
+        commit-message: "Create release v${{ github.event.inputs.version }}"
+        title: "Create release v${{ github.event.inputs.version }}"
+        body: ":crown: Create release v${{ github.event.inputs.version }}"
