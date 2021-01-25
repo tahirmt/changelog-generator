@@ -8,6 +8,11 @@ on:
       version:
         description: 'Version'
         required: true
+      
+      createBuild:
+        description: 'Create compiled executable?'
+        default: 'true'
+        required: true
 
 jobs:
   update-changelog:
@@ -28,6 +33,10 @@ jobs:
     - name: Update changelog
       run: |
         ./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
+    
+    - name: Create build
+      if: github.event.inputs.createBuild == 'true'
+      run: make
     
     - name: Push branch
       run: |
