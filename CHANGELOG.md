@@ -1,4 +1,12 @@
 
+#v1.0.1
+------
+
+- [#7](https://github.com/tahirmt/changelog-generator/pull/7): Update the packaged file by [tahirmt](https://github.com/tahirmt)
+- [#6](https://github.com/tahirmt/changelog-generator/pull/6): Add changelog by [tahirmt](https://github.com/tahirmt)
+- [#5](https://github.com/tahirmt/changelog-generator/pull/5): Update github repository and owner to be one variable by [tahirmt](https://github.com/tahirmt)
+- [#3](https://github.com/tahirmt/changelog-generator/pull/3): Fixes an issue where without labels the Other group showed up by [tahirmt](https://github.com/tahirmt)
+
 #v1.0.0
 ------
 
