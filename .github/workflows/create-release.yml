@@ -1,0 +1,50 @@
+name: Create Release
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  create-release:
+    runs-on: macos-latest
+    if: github.event.pull_request.merged == true && github.head_ref == 'create-release'
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Get app version
+      id: get-version
+      working-directory: Sources
+      run: |
+        # expecting Create release <tag-version>
+        title=${{ github.event.pull_request.title }}
+        tag=${title:15}
+
+        echo "::set-output name=tag::$tag"
+
+    - name: Update tag
+      uses: richardsimko/update-tag@v1
+      with:
+        tag_name: "${{ steps.get-version.outputs.tag }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Changelog
+      id: get-changelog
+      run: |
+        output=$(./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }})
+
+        echo "::set-output name=changelog::$output"
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "${{ steps.get-version.outputs.tag }}"
+        release_name: ${{ steps.get-version.outputs.tag }}
+        body: |
+          ${{ steps.get-changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
