@@ -59,7 +59,10 @@ struct Generate: ParsableCommand {
     var nextTag: String?
 
     @Option(help: "Whether or not to include untagged PRs that were merged")
-    var includeUntagged: Bool = true
+    var includeUntagged: String = "true"
+
+    @Option(help: "When this is true, the output will be logged to the console even when writing to file.")
+    var logConsole: String = "false"
 
     // MARK: - ParsableCommand
 
@@ -71,7 +74,7 @@ struct Generate: ParsableCommand {
             filterRegEx: filterRegEx,
             maximumNumberOfPages: maxPages,
             nextTag: nextTag,
-            includeUntagged: includeUntagged)
+            includeUntagged: includeUntagged == "true")
 
         let semaphore = DispatchSemaphore(value: 0)
         var generatorResult: Result<String, Error>?
@@ -116,6 +119,10 @@ struct Generate: ParsableCommand {
         guard let filePath = output else {
             print(changelog)
             return
+        }
+
+        if logConsole == "true" {
+            print(changelog)
         }
 
         let url = URL(fileURLWithPath: filePath)
