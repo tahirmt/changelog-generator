@@ -1,0 +1,122 @@
+# action.yml
+name: 'Changelog Generator'
+description: 'Generates changelog on a pull request automatically'
+inputs:
+  token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
+    required: true
+    default: ${{ github.token }}
+
+  outputFile:
+    description: 'The output file. Use output if not provided'
+    required: false
+
+  since:
+    description: 'Tag to generate since. Uses since latest release if not provided'
+    required: false
+  
+  complete:
+    description: 'Whether to generate the complete changelog. This is not recommended as it will fetch all tags and all pull requests. Complete and since cannot be used together.'
+    required: true
+    default: 'false'
+
+  nextTag:
+    description: 'The tag of the next version'
+    required: false
+
+  filter:
+    description: 'Filter regex'
+    required: false
+  
+  labels:
+    description: 'Group Labels'
+    required: false
+
+  includeUntagged:
+    description: 'Whether to include untagged PRs. Defaults to true.'
+    required: true
+    default: 'true'
+
+outputs:
+  changelog:
+    description: the generated changelog
+    value: ${{ steps.generate.outputs.changelog }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: generate
+      run: |
+        repository=${{ github.repository }}
+        token=${{ inputs.token }}
+        outputFile=${{ inputs.outputFile }}
+        since=${{ inputs.since }}
+        complete=${{ inputs.complete }}
+        nextTag=${{ inputs.nextTag }}
+        filter=${{ inputs.filter }}
+        labels=${{ inputs.labels }}
+        includeUntagged=${{ inputs.includeUntagged }}
+
+        command=""
+        
+        if [ -z "$repository" ]; then
+          echo "Repository cannot be empty"
+          exit 1
+        else
+          command+=" --repository=$repository"
+        fi
+
+        if [ -z "$token" ]; then
+          echo "token is empty"
+        else
+          command+=" --token=$token"
+        fi
+
+        if [ "$complete" == "true" ]; then
+          command+=" --type=complete"
+        else
+          if [ -z "$since" ]; then
+            echo "since is empty"
+          else
+            command+=" --type=sinceTag"
+            command+=" --tag=$since"
+          fi
+        fi
+
+        if [ -z "$nextTag" ]; then
+          echo "nextTag is empty"
+        else
+          command+=" --next-tag=$nextTag"
+        fi
+
+        if [ -z "$outputFile" ]; then
+          echo "outputFile is empty"
+        else
+          command+=" --output=$outputFile"
+        fi
+
+        if [ -z "$filter" ]; then
+          echo "filter is empty"
+        else
+          command+=" --filter-reg-ex=$filter"
+        fi
+        
+        if [ -z "$labels" ]; then
+          echo "labels is empty"
+        else
+          command+=" --labels=$labels"
+        fi
+
+        if [ -z "$includeUntagged" ]; then
+          echo "includeUntagged is empty"
+        else
+          command+=" --include-untagged=$includeUntagged"
+        fi
+
+        command+=" --log-console=true"
+
+        changelog=$(${{ github.action_path }}/changelog generate $command | base64)
+
+        echo "::set-output name=changelog::$changelog"
+      
+      shell: bash
