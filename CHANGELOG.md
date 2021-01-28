@@ -1,4 +1,9 @@
 
+#v1.0.3
+------
+
+- [#11](https://github.com/tahirmt/changelog-generator/pull/11): Adds github action by [tahirmt](https://github.com/tahirmt)
+
 #v1.0.2
 ------
 
