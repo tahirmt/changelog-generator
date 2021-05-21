@@ -52,29 +52,41 @@ struct Generate: ParsableCommand {
     @Option(help:"The regular expression for pull request title filter. Any pull requests whose title matches the expression will be excluded from the log")
     var filterRegEx: String?
 
+    @Option(help:"The PRs tagged with these labels will not appear in the change log")
+    var excludedLabels: String = ""
+
     @Option(help: "The labels to group by. By default no grouping is applied. Comma separated.")
     var labels: String = ""
 
     @Option(help: "When provided, this tag is used for all the PRs that are not under a tag. Do this before a release is created.")
     var nextTag: String?
 
-    @Option(help: "Whether or not to include untagged PRs that were merged")
-    var includeUntagged: String = "true"
+    @Option(help: "Can be used with sinceTag and sinceLatestRelease type to only get PRs merged on a specific branch")
+    var branch: String?
 
-    @Option(help: "When this is true, the output will be logged to the console even when writing to file.")
-    var logConsole: String = "false"
+    @Flag(help: "Whether or not to include untagged PRs that were merged")
+    var excludeUntagged: Bool = false
+
+    @Flag(help: "When this is true, the output will be logged to the console even when writing to file.")
+    var logConsole: Bool = false
+
+    @Flag(help: "Whether or not to enable verbose logging")
+    var verbose: Bool = false
 
     // MARK: - ParsableCommand
 
     func run() throws {
+        Logger.verbose = verbose
+
         let generator = try Generator(
             repository: repository,
             token: token,
             labels: labels.isEmpty ? [] : labels.components(separatedBy: ","),
+            excludedLabels: excludedLabels.isEmpty ? [] : excludedLabels.components(separatedBy: ","),
             filterRegEx: filterRegEx,
             maximumNumberOfPages: maxPages,
             nextTag: nextTag,
-            includeUntagged: includeUntagged == "true")
+            includeUntagged: !excludeUntagged)
 
         let semaphore = DispatchSemaphore(value: 0)
         var generatorResult: Result<String, Error>?
@@ -95,7 +107,7 @@ struct Generate: ParsableCommand {
                 throw GenerateError.missingTag
             }
 
-            generator.generateChangeLogSince(tag: tag) { result in
+            generator.generateChangeLogSince(tag: tag, on: branch) { result in
                 generatorResult = result
                 semaphore.signal()
             }
@@ -116,12 +128,14 @@ struct Generate: ParsableCommand {
     }
 
     private func process(changelog: String) throws {
+        Logger.log("process \n \(changelog)")
+
         guard let filePath = output else {
             print(changelog)
             return
         }
 
-        if logConsole == "true" {
+        if logConsole {
             print(changelog)
         }
 

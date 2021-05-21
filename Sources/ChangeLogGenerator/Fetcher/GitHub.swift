@@ -8,11 +8,27 @@
 import Foundation
 
 struct GitHub {
-    enum Endpoint: String {
+    enum Endpoint {
         case pulls
         case tags
         case releases
         case search
+        case compare(String, String)
+
+        var path: String {
+            switch self {
+            case .pulls:
+                return "pulls"
+            case .tags:
+                return "tags"
+            case .releases:
+                return "releases"
+            case .search:
+                return "search"
+            case .compare:
+                return "compare"
+            }
+        }
     }
 
     // MARK: Properties
@@ -26,7 +42,10 @@ struct GitHub {
     private var headers: [String: String] {
         guard let token = token else { return [:] }
 
-        return ["Authorization": "token \(token)"]
+        return [
+            "Authorization": "token \(token)",
+            "Accept": "application/vnd.github.v3+json",
+        ]
     }
 
     // MARK: Helper
@@ -38,13 +57,21 @@ struct GitHub {
                 base,
                 "repos",
                 repository,
-                endpoint.rawValue,
+                endpoint.path,
             ].joined(separator: "/")
         case .search:
             return [
                 base,
-                endpoint.rawValue,
-                "issues"
+                endpoint.path,
+                "issues",
+            ].joined(separator: "/")
+        case .compare(let base, let head):
+            return [
+                self.base,
+                "repos",
+                repository,
+                endpoint.path,
+                "\(base)...\(head)",
             ].joined(separator: "/")
         }
     }
@@ -55,7 +82,8 @@ struct GitHub {
     ///   - maximumNumberOfPages: maximum number of pages to fetch
     ///   - intermediateResultHandler: return true if the next page should be loaded.
     ///   - completionHandler: will be called with the result of all pages once
-    func fetch<T: Decodable>(from endpoint: Endpoint, maximumNumberOfPages: Int? = nil,
+    func fetch<T: Decodable>(from endpoint: Endpoint,
+                             maximumNumberOfPages: Int? = nil,
                              intermediateResultHandler: (([T]) -> Bool)? = nil,
                              completionHandler: @escaping (Result<[T], APIError>) -> Void) {
         guard let url = URL(string: createBaseUrl(for: endpoint)) else {
@@ -148,6 +176,28 @@ struct GitHub {
             params: params,
             maximumNumberOfPages: maximumNumberOfPages,
             session: session)
+        fetcher.fetchAllPages(completionHandler: completionHandler)
+    }
+
+    /// Fetch comparison between two refs
+    /// - Parameters:
+    ///   - base: the base ref. It can be a branch, tag or sha
+    ///   - head: the head ref. It can be a branch, tag or sha
+    ///   - maximumNumberOfPages: The maximum number of pages to fetch
+    ///   - completionHandler: will be called with the comparison result
+    func fetchComparison(from base: String, to head: String, maximumNumberOfPages: Int? = nil, completionHandler: @escaping (Result<Comparison, APIError>) -> Void) {
+        guard let url = URL(string: createBaseUrl(for: .compare(base, head))) else {
+            completionHandler(.failure(.invalidUrl))
+            return
+        }
+
+        let fetcher = ComparisonFetcher(
+            url: url,
+            headers: headers,
+            params: params,
+            maximumNumberOfPages: maximumNumberOfPages,
+            session: session)
+
         fetcher.fetchAllPages(completionHandler: completionHandler)
     }
 }
