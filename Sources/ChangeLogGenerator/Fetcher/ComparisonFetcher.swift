@@ -69,7 +69,7 @@ class ComparisonFetcher {
         fetch(page: currentPage) { result in
             switch result {
             case .failure(let error):
-                print("got failure \(error)")
+                Logger.log("got failure \(error)")
                 self.finish(error: error)
             case .success(let data):
                 if self.result == nil {
@@ -123,7 +123,7 @@ class ComparisonFetcher {
         catch let error as APIError {
             completionHandler(.failure(error))
         }
-        catch  {
+        catch {
             completionHandler(.failure(.error(error)))
         }
     }

@@ -77,7 +77,7 @@ runs:
         branch=${{ inputs.branch }}
         excludedLabels=${{ inputs.excludedLabels }}
 
-        # add space escapes to labels comma separated array
+        # escape the space character in the labels comma separated string
         labels=${labels//' '/'\ '}
         excludedLabels=${excludedLabels//' '/'\ '}
 
@@ -98,7 +98,7 @@ runs:
 
         if [ "$complete" == "true" ]; then
           command+=" --type complete"
-        elif [ "sinceLatestRelease" == "true" ];then
+        elif [ "sinceLatestRelease" == "true" ]; then
           command+=" --type since-latest-release"
         elif [ -z "$since" ]; then
             echo "since is empty"

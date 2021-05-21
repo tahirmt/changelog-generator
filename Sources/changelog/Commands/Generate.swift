@@ -128,7 +128,7 @@ struct Generate: ParsableCommand {
     }
 
     private func process(changelog: String) throws {
-        Logger.log("process \n \(changelog)")
+        Logger.log(level: .verbose, "process \n \(changelog)")
 
         guard let filePath = output else {
             print(changelog)

@@ -69,7 +69,7 @@ class PaginationFetcher<T: Decodable> {
         fetch(page: currentPage) { result in
             switch result {
             case .failure(let error):
-                print("got failure \(error)")
+                Logger.log("got failure \(error)")
                 self.finish(error: error)
             case .success(let data):
                 self.allObjects.append(contentsOf: data)

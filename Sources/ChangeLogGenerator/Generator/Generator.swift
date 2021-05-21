@@ -226,7 +226,7 @@ public struct Generator {
             }
 
             var shouldFilterOut = expression.map {
-                pullRequest.simpleMessage.matches(regularExpression: $0)
+                pullRequest.title.matches(regularExpression: $0)
             } ?? false
 
             shouldFilterOut = shouldFilterOut || pullRequest.labels.contains { excludedLabels.contains($0.name) }
@@ -259,7 +259,7 @@ public struct Generator {
                 }
 
                 group.pullRequests.forEach {
-                    lines.append($0.simpleMessage)
+                    lines.append($0.formattedMessage)
                 }
             }
         }

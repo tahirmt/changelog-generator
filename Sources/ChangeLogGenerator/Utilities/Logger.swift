@@ -10,8 +10,13 @@ import Foundation
 public final class Logger {
     public static var verbose = false
 
-    public static func log(_ items: Any...) {
-        guard verbose else { return }
+    public enum Level {
+        case `default`
+        case verbose
+    }
+
+    public static func log(level: Level = .default, _ items: Any...) {
+        if level == .verbose && verbose == false { return }
 
         print("")
         items.forEach {

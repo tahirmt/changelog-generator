@@ -25,7 +25,7 @@ struct PullRequest: Decodable {
     let labels: [Label]
     let user: User
 
-    var simpleMessage: String {
+    var formattedMessage: String {
         "- [#\(number)](\(htmlUrl)): \(title) by [\(user.login)](\(user.htmlUrl))"
     }
 }
