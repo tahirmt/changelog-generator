@@ -14,6 +14,10 @@ inputs:
   since:
     description: 'Tag to generate since. Uses since latest release if not provided'
     required: false
+
+  sinceLatestRelease:
+    description: 'Can use this in place of since to get change log since the latest release'
+    required: false
   
   complete:
     description: 'Whether to generate the complete changelog. This is not recommended as it will fetch all tags and all pull requests. Complete and since cannot be used together.'
@@ -25,17 +29,29 @@ inputs:
     required: false
 
   filter:
-    description: 'Filter regex'
+    description: 'Filter regex. Matching PR titles will be ignored.'
     required: false
   
   labels:
-    description: 'Group Labels'
+    description: 'Labels to group by'
+    required: false
+  
+  excludedLabels:
+    description: 'The labels to exclude from the change log'
+    required: false
+
+  branch:
+    description: 'The branch to get change log for'
     required: false
 
   includeUntagged:
     description: 'Whether to include untagged PRs. Defaults to true.'
     required: true
     default: 'true'
+
+  verbose:
+    description: 'Enable verbose logging'
+    required: false
 
 outputs:
   changelog:
@@ -56,6 +72,14 @@ runs:
         filter=${{ inputs.filter }}
         labels=${{ inputs.labels }}
         includeUntagged=${{ inputs.includeUntagged }}
+        sinceLatestRelease=${{ inputs.sinceLatestRelease }}
+        verbose=${{ inputs.verbose }}
+        branch=${{ inputs.branch }}
+        excludedLabels=${{ inputs.excludedLabels }}
+
+        # escape the space character in the labels comma separated string
+        labels=${labels//' '/'\ '}
+        excludedLabels=${excludedLabels//' '/'\ '}
 
         command=""
         
@@ -63,57 +87,71 @@ runs:
           echo "Repository cannot be empty"
           exit 1
         else
-          command+=" --repository=$repository"
+          command+=" --repository $repository"
         fi
 
         if [ -z "$token" ]; then
           echo "token is empty"
         else
-          command+=" --token=$token"
+          command+=" --token $token"
         fi
 
         if [ "$complete" == "true" ]; then
-          command+=" --type=complete"
-        else
-          if [ -z "$since" ]; then
+          command+=" --type complete"
+        elif [ "sinceLatestRelease" == "true" ]; then
+          command+=" --type since-latest-release"
+        elif [ -z "$since" ]; then
             echo "since is empty"
-          else
-            command+=" --type=sinceTag"
-            command+=" --tag=$since"
-          fi
+        else
+            command+=" --type sinceTag"
+            command+=" --tag $since"
         fi
 
         if [ -z "$nextTag" ]; then
           echo "nextTag is empty"
         else
-          command+=" --next-tag=$nextTag"
+          command+=" --next-tag $nextTag"
         fi
 
         if [ -z "$outputFile" ]; then
           echo "outputFile is empty"
         else
-          command+=" --output=$outputFile"
+          command+=" --output $outputFile"
         fi
 
         if [ -z "$filter" ]; then
           echo "filter is empty"
         else
-          command+=" --filter-reg-ex=$filter"
+          command+=" --filter-reg-ex $filter"
         fi
         
         if [ -z "$labels" ]; then
           echo "labels is empty"
         else
-          command+=" --labels=$labels"
+          command+=" --labels $labels"
         fi
 
-        if [ -z "$includeUntagged" ]; then
-          echo "includeUntagged is empty"
+        if [ -z "$excludedLabels" ]; then
+          echo "excludedLabels is empty"
         else
-          command+=" --include-untagged=$includeUntagged"
+          command+=" --excluded-labels $excludedLabels"
         fi
 
-        command+=" --log-console=true"
+        if [ -z "$branch" ]; then
+          echo "branch is empty"
+        else
+          command+=" --branch $branch"
+        fi
+
+        if [ "$includeUntagged" == "false" ]; then
+          command+=" --exclude-untagged"
+        fi
+
+        if [ "$verbose" == "true" ]; then
+          command+=" --verbose"
+        fi
+
+        command+=" --log-console"
 
         changelog=$(${{ github.action_path }}/changelog generate $command | base64)
 

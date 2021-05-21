@@ -82,6 +82,7 @@ struct Fetcher<Data: Decodable> {
             request.setValue($1, forHTTPHeaderField: $0)
         }
 
+        Logger.log(level: .verbose, "Fetch data from", url)
         let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
                 completionHandler(.failure(.error(error)))
@@ -89,6 +90,7 @@ struct Fetcher<Data: Decodable> {
             }
 
             if let urlResponse = response as? HTTPURLResponse, urlResponse.statusCode == 404 {
+                Logger.log(level: .verbose, "404 - not found at", url)
                 completionHandler(.failure(.notFound))
                 return
             }
@@ -99,6 +101,8 @@ struct Fetcher<Data: Decodable> {
             }
 
             do {
+                Logger.log(level: .verbose, "received")
+                Logger.log(level: .verbose, String(data: data, encoding: .utf8) ?? "")
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .formatted(.formatter)
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -108,6 +112,7 @@ struct Fetcher<Data: Decodable> {
                 completionHandler(.success(objects))
             }
             catch {
+                Logger.log(level: .verbose, "decoding error", error.localizedDescription)
                 completionHandler(.failure(.decodingError(error)))
             }
         }

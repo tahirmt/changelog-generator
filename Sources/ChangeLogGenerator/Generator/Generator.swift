@@ -8,6 +8,7 @@ public struct Generator {
     let repository: String
     let token: String?
     let labels: [String]
+    let excludedLabels: [String]
     let filterRegEx: String?
     /// the maximum number of pages to fetch. By default it is nil which means fetch all.
     let maximumNumberOfPages: Int?
@@ -19,6 +20,7 @@ public struct Generator {
     public init(repository: String,
                 token: String?,
                 labels: [String],
+                excludedLabels: [String],
                 filterRegEx: String?,
                 maximumNumberOfPages: Int?,
                 nextTag: String?,
@@ -31,6 +33,7 @@ public struct Generator {
         self.repository = repository
         self.token = token
         self.labels = labels
+        self.excludedLabels = excludedLabels
         self.filterRegEx = filterRegEx
         self.maximumNumberOfPages = maximumNumberOfPages
         self.nextTag = nextTag
@@ -42,7 +45,7 @@ public struct Generator {
     /// Generates the changelog since the latest release.
     ///
     /// Fetches the latest release and fetches the number of pages specified since the last release
-    public func generateChangeLogSinceLatestRelease(completion: @escaping (Result<String, Error>) -> Void) {
+    public func generateChangeLogSinceLatestRelease(on branch: String? = nil, completion: @escaping (Result<String, Error>) -> Void) {
 
         // get the latest release
         GitHub(repository: repository, token: token)
@@ -56,16 +59,21 @@ public struct Generator {
                         return
                     }
 
-                    // fetch pull requests since the release
-                    GitHub(repository: self.repository, token: self.token)
-                        .fetchPullRequests(mergedAfter: released, maximumNumberOfPages: maximumNumberOfPages) { pullRequestResult in
-                            switch pullRequestResult {
-                            case .failure(let error):
-                                completion(.failure(error))
-                            case .success(let pulls):
-                                completion(.success(self.createChangelog(pulls: pulls)))
+                    if let branch = branch {
+                        self.generateChangeLogSince(tag: release.tagName, on: branch, completion: completion)
+                    }
+                    else {
+                        // fetch pull requests since the release
+                        GitHub(repository: self.repository, token: self.token)
+                            .fetchPullRequests(mergedAfter: released, maximumNumberOfPages: maximumNumberOfPages) { pullRequestResult in
+                                switch pullRequestResult {
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                case .success(let pulls):
+                                    completion(.success(self.createChangelog(pulls: pulls)))
+                                }
                             }
-                        }
+                    }
                 }
             }
     }
@@ -76,7 +84,7 @@ public struct Generator {
     ///   - tag: the tag to look for
     ///   - maximumNumberOfPages: maximum number of pages to load
     ///   - completion: will finish with a changelog string
-    public func generateChangeLogSince(tag: String, completion: @escaping (Result<String, Error>) -> Void) {
+    public func generateChangeLogSince(tag: String, on branch: String? = nil, completion: @escaping (Result<String, Error>) -> Void) {
         GitHub(repository: repository, token: token)
             .fetch(from: .tags, maximumNumberOfPages: maximumNumberOfPages) { (tags: [Tag]) -> Bool in
                 tags.contains(where: { $0.name == tag })
@@ -104,13 +112,38 @@ public struct Generator {
                             case .failure(let error):
                                 completion(.failure(error))
                             case .success(let pulls):
-                                var allPulls = pulls
+                                var allPulls = pulls.filter {
+                                    $0.mergedAt != nil
+                                }
                                 var filteredPulls = [PullRequest]()
                                 while allPulls.isEmpty == false && allPulls[0].mergeCommitSha != tag.commit.sha {
                                     filteredPulls.append(allPulls.removeFirst())
                                 }
 
-                                completion(.success(self.createChangelog(usingTags: filteredTags, pulls: filteredPulls)))
+                                if let branch = branch {
+                                    // fetch the comparison
+
+                                    GitHub(repository: repository, token: token)
+                                        .fetchComparison(from: tag.name,
+                                                         to: branch,
+                                                         maximumNumberOfPages: maximumNumberOfPages) { result in
+                                            switch result {
+                                            case .failure(let error):
+                                                completion(.failure(error))
+                                            case .success(let comparison):
+                                                filteredPulls = filteredPulls.filter { pull in
+                                                    comparison.commits.contains {
+                                                        $0.sha == pull.mergeCommitSha
+                                                    }
+                                                }
+
+                                                completion(.success(self.createChangelog(usingTags: filteredTags, pulls: filteredPulls)))
+                                            }
+                                        }
+                                }
+                                else {
+                                    completion(.success(self.createChangelog(usingTags: filteredTags, pulls: filteredPulls)))
+                                }
                             }
                         }
                 }
@@ -178,6 +211,8 @@ public struct Generator {
             try? NSRegularExpression(pattern: $0)
         } as? NSRegularExpression
 
+        let excludedLabels = self.excludedLabels
+
         var changeLogEntries = [ChangelogEntry]()
 
         var entry = ChangelogEntry(tag: nextTag, pullRequests: [])
@@ -190,9 +225,11 @@ public struct Generator {
                 entry = ChangelogEntry(tag: tag.name, pullRequests: [])
             }
 
-            let shouldFilterOut = expression.map {
-                pullRequest.simpleMessage.matches(regularExpression: $0)
+            var shouldFilterOut = expression.map {
+                pullRequest.title.matches(regularExpression: $0)
             } ?? false
+
+            shouldFilterOut = shouldFilterOut || pullRequest.labels.contains { excludedLabels.contains($0.name) }
 
             if shouldFilterOut == false {
                 entry.pullRequests.append(pullRequest)
@@ -222,7 +259,7 @@ public struct Generator {
                 }
 
                 group.pullRequests.forEach {
-                    lines.append($0.simpleMessage)
+                    lines.append($0.formattedMessage)
                 }
             }
         }
