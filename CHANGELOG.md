@@ -1,4 +1,9 @@
 
+#v1.1
+------
+
+- [#13](https://github.com/tahirmt/changelog-generator/pull/13): Add changelog for branch only by [tahirmt](https://github.com/tahirmt)
+
 #v1.0.3
 ------
 
