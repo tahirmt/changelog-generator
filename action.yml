@@ -52,6 +52,11 @@ inputs:
   verbose:
     description: 'Enable verbose logging'
     required: false
+    
+  make-before-run:
+    description: 'When set to true it will create the executable before running'
+    required: false
+    default: 'false'
 
 outputs:
   changelog:
@@ -152,6 +157,12 @@ runs:
         fi
 
         command+=" --log-console"
+        
+        if [ "${{ inputs.make-before-run }}" == "true" ]; then
+          pushd ${{ github.action_path }}
+          make
+          popd
+        fi
 
         changelog=$(${{ github.action_path }}/changelog generate $command | base64)
 
