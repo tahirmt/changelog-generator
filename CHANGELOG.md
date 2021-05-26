@@ -1,4 +1,9 @@
 
+#v1.1.1
+------
+
+- [#17](https://github.com/tahirmt/changelog-generator/pull/17): Wrap inputs in quotes to allow spaces by [tahirmt](https://github.com/tahirmt)
+
 #v1.1
 ------
 
