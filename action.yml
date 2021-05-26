@@ -63,19 +63,19 @@ runs:
   steps:
     - id: generate
       run: |
-        repository=${{ github.repository }}
-        token=${{ inputs.token }}
-        outputFile=${{ inputs.outputFile }}
-        since=${{ inputs.since }}
-        complete=${{ inputs.complete }}
-        nextTag=${{ inputs.nextTag }}
-        filter=${{ inputs.filter }}
-        labels=${{ inputs.labels }}
-        includeUntagged=${{ inputs.includeUntagged }}
-        sinceLatestRelease=${{ inputs.sinceLatestRelease }}
-        verbose=${{ inputs.verbose }}
-        branch=${{ inputs.branch }}
-        excludedLabels=${{ inputs.excludedLabels }}
+        repository="${{ github.repository }}"
+        token="${{ inputs.token }}"
+        outputFile="${{ inputs.outputFile }}"
+        since="${{ inputs.since }}"
+        complete="${{ inputs.complete }}"
+        nextTag="${{ inputs.nextTag }}"
+        filter="${{ inputs.filter }}"
+        labels="${{ inputs.labels }}"
+        includeUntagged="${{ inputs.includeUntagged }}"
+        sinceLatestRelease="${{ inputs.sinceLatestRelease }}"
+        verbose="${{ inputs.verbose }}"
+        branch="${{ inputs.branch }}"
+        excludedLabels="${{ inputs.excludedLabels }}"
 
         # escape the space character in the labels comma separated string
         labels=${labels//' '/'\ '}
