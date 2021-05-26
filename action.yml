@@ -77,83 +77,83 @@ runs:
         branch="${{ inputs.branch }}"
         excludedLabels="${{ inputs.excludedLabels }}"
 
-        # escape the space character in the labels comma separated string
-        labels=${labels//' '/'\ '}
-        excludedLabels=${excludedLabels//' '/'\ '}
+        # We use array because that's the only clean way to construct a command while preserving spaces
+        # https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable
 
-        command=""
-        
+        command=("${{ github.action_path }}/changelog")
+        command+=("generate")
+
         if [ -z "$repository" ]; then
           echo "Repository cannot be empty"
           exit 1
         else
-          command+=" --repository $repository"
+          command+=("--repository=$repository")
         fi
 
         if [ -z "$token" ]; then
           echo "token is empty"
         else
-          command+=" --token $token"
+          command+=("--token=$token")
         fi
 
         if [ "$complete" == "true" ]; then
-          command+=" --type complete"
+          command+=("--type=complete")
         elif [ "sinceLatestRelease" == "true" ]; then
-          command+=" --type since-latest-release"
+          command+=("--type=since-latest-release")
         elif [ -z "$since" ]; then
             echo "since is empty"
         else
-            command+=" --type sinceTag"
-            command+=" --tag $since"
+            command+=("--type=sinceTag")
+            command+=("--tag=$since")
         fi
 
         if [ -z "$nextTag" ]; then
           echo "nextTag is empty"
         else
-          command+=" --next-tag $nextTag"
+          command+=("--next-tag=$nextTag")
         fi
 
         if [ -z "$outputFile" ]; then
           echo "outputFile is empty"
         else
-          command+=" --output $outputFile"
+          command+=("--output=$outputFile")
         fi
 
         if [ -z "$filter" ]; then
           echo "filter is empty"
         else
-          command+=" --filter-reg-ex $filter"
+          command+=("--filter-reg-ex=$filter")
         fi
         
         if [ -z "$labels" ]; then
           echo "labels is empty"
         else
-          command+=" --labels $labels"
+          command+=("--labels=\"$labels\"")
         fi
 
         if [ -z "$excludedLabels" ]; then
           echo "excludedLabels is empty"
         else
-          command+=" --excluded-labels $excludedLabels"
+          command+=("--excluded-labels=\"$excludedLabels\"")
         fi
 
         if [ -z "$branch" ]; then
           echo "branch is empty"
         else
-          command+=" --branch $branch"
+          command+=("--branch=$branch")
         fi
 
         if [ "$includeUntagged" == "false" ]; then
-          command+=" --exclude-untagged"
+          command+=("--exclude-untagged")
         fi
 
         if [ "$verbose" == "true" ]; then
-          command+=" --verbose"
+          command+=("--verbose")
         fi
 
-        command+=" --log-console"
+        command+=("--log-console")
 
-        changelog=$(${{ github.action_path }}/changelog generate $command | base64)
+        changelog=$("${command[@]}" | base64)
 
         echo "::set-output name=changelog::$changelog"
       
