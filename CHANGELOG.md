@@ -1,4 +1,9 @@
 
+#v1.1.2
+------
+
+- [#19](https://github.com/tahirmt/changelog-generator/pull/19): Fix spaces causing script failures (#1) by [tahirmt](https://github.com/tahirmt)
+
 #v1.1.1
 ------
 
