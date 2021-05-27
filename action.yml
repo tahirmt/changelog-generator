@@ -128,13 +128,13 @@ runs:
         if [ -z "$labels" ]; then
           echo "labels is empty"
         else
-          command+=("--labels=\"$labels\"")
+          command+=("--labels=$labels")
         fi
 
         if [ -z "$excludedLabels" ]; then
           echo "excludedLabels is empty"
         else
-          command+=("--excluded-labels=\"$excludedLabels\"")
+          command+=("--excluded-labels=$excludedLabels")
         fi
 
         if [ -z "$branch" ]; then
