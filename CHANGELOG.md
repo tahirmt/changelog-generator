@@ -1,4 +1,9 @@
 
+#v1.1.3
+------
+
+- [#21](https://github.com/tahirmt/changelog-generator/pull/21): Make single input array work by [tahirmt](https://github.com/tahirmt)
+
 #v1.1.2
 ------
 
