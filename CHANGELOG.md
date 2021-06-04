@@ -1,4 +1,9 @@
 
+#v1.1.4
+------
+
+- [#23](https://github.com/tahirmt/changelog-generator/pull/23): Fix changelog script since latest release by [tahirmt](https://github.com/tahirmt)
+
 #v1.1.3
 ------
 
