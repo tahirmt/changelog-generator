@@ -88,6 +88,8 @@ struct Generate: ParsableCommand {
             nextTag: nextTag,
             includeUntagged: !excludeUntagged)
 
+        Logger.log(level: .verbose, "generator \(generator)")
+
         let semaphore = DispatchSemaphore(value: 0)
         var generatorResult: Result<String, Error>?
 
@@ -98,7 +100,7 @@ struct Generate: ParsableCommand {
                 semaphore.signal()
             }
         case .sinceLatestRelease:
-            generator.generateChangeLogSinceLatestRelease { result in
+            generator.generateChangeLogSinceLatestRelease(on: branch) { result in
                 generatorResult = result
                 semaphore.signal()
             }
