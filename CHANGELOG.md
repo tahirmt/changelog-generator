@@ -1,4 +1,9 @@
 
+#v1.3.0
+------
+
+- [#29](https://github.com/tahirmt/changelog-generator/pull/29): Build universal binary by [tahirmt](https://github.com/tahirmt)
+
 #v1.2.0
 ------
 
