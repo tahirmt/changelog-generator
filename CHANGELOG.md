@@ -1,4 +1,9 @@
 
+# v1.3.1
+------
+
+- [#31](https://github.com/tahirmt/changelog-generator/pull/31): Copy the correct release file by [tahirmt](https://github.com/tahirmt)
+
 #v1.3.0
 ------
 
