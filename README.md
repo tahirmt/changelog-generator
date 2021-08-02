@@ -12,7 +12,7 @@ You can use the precompiled executable `changelog` or ues `make` to create a new
 
 It procuces an output similar to below
 
-#4.0.1
+# 4.0.1
 ------
 
 - [#4555](https://github.com/AFNetworking/AFNetworking/pull/4555): Prepare 4.0.1 Release by [jshier](https://github.com/jshier)
@@ -21,7 +21,7 @@ It procuces an output similar to below
 - [#4550](https://github.com/AFNetworking/AFNetworking/pull/4550): Replace instead of appending to the default header by [ElfSundae](https://github.com/ElfSundae)
 
 
-#4.0.0
+# 4.0.0
 ------
 
 - [#4527](https://github.com/AFNetworking/AFNetworking/pull/4527): Prepare 4.0.0. by [jshier](https://github.com/jshier)
