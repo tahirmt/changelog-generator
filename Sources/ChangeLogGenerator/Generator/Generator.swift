@@ -246,7 +246,7 @@ public struct Generator {
 
         changeLogEntries.forEach { entry in
             if let tag = entry.tag, entry.pullRequests.isEmpty == false {
-                lines.append("\n#\(tag)")
+                lines.append("\n# \(tag)")
                 lines.append("------\n")
             }
 
@@ -255,7 +255,7 @@ public struct Generator {
 
             groups.forEach { group in
                 if showGroupLabel, group.pullRequests.isEmpty == false {
-                    lines.append("\n###\(group.name)\n")
+                    lines.append("\n### \(group.name)\n")
                 }
 
                 group.pullRequests.forEach {
