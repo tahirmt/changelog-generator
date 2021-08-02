@@ -1,4 +1,9 @@
 
+#v1.2.0
+------
+
+- [#26](https://github.com/tahirmt/changelog-generator/pull/26): Add space after # as per the markdown formatting by [tahirmt](https://github.com/tahirmt)
+
 #v1.1.4
 ------
 
