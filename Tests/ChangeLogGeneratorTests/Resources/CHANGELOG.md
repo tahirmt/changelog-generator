@@ -9,7 +9,7 @@
 - [#4574](https://github.com/AFNetworking/AFNetworking/pull/4574): Fix docblock by [ElfSundae](https://github.com/ElfSundae)
 - [#4562](https://github.com/AFNetworking/AFNetworking/pull/4562): Fix typo in CHANGELOG by [ElfSundae](https://github.com/ElfSundae)
 
-#4.0.1
+# 4.0.1
 ------
 
 - [#4555](https://github.com/AFNetworking/AFNetworking/pull/4555): Prepare 4.0.1 Release by [jshier](https://github.com/jshier)
@@ -28,7 +28,7 @@
 - [#4531](https://github.com/AFNetworking/AFNetworking/pull/4531): (Infra) Make infra changes to cleanup project and simplify its maintenance by [Kaspik](https://github.com/Kaspik)
 - [#4528](https://github.com/AFNetworking/AFNetworking/pull/4528): Improve podspec by [ElfSundae](https://github.com/ElfSundae)
 
-#4.0.0
+# 4.0.0
 ------
 
 - [#4527](https://github.com/AFNetworking/AFNetworking/pull/4527): Prepare 4.0.0. by [jshier](https://github.com/jshier)
@@ -90,7 +90,7 @@
 - [#4131](https://github.com/AFNetworking/AFNetworking/pull/4131): UIImageView+AFNetworking: Prevent stuck state for malformed urlRequest by [aduflo](https://github.com/aduflo)
 - [#4155](https://github.com/AFNetworking/AFNetworking/pull/4155): Update HTTPBin.org certificates. by [SlaunchaMan](https://github.com/SlaunchaMan)
 
-#3.2.0
+# 3.2.0
 ------
 
 - [#4138](https://github.com/AFNetworking/AFNetworking/pull/4138): Use @available if available to silence a warning. by [SlaunchaMan](https://github.com/SlaunchaMan)

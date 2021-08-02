@@ -9,7 +9,7 @@
 - [#4572](https://github.com/AFNetworking/AFNetworking/pull/4572): Disable 'Zombie Objects' diagnostics for tvOS scheme by [faithfracture](https://github.com/faithfracture)
 - [#4562](https://github.com/AFNetworking/AFNetworking/pull/4562): Fix typo in CHANGELOG by [ElfSundae](https://github.com/ElfSundae)
 
-#4.0.1
+# 4.0.1
 ------
 
 - [#4555](https://github.com/AFNetworking/AFNetworking/pull/4555): Prepare 4.0.1 Release by [jshier](https://github.com/jshier)
@@ -28,7 +28,7 @@
 - [#4529](https://github.com/AFNetworking/AFNetworking/pull/4529): Add FOUNDATION_EXPORT for AFJSONObjectByRemovingKeysWithNullValues by [ElfSundae](https://github.com/ElfSundae)
 - [#4528](https://github.com/AFNetworking/AFNetworking/pull/4528): Improve podspec by [ElfSundae](https://github.com/ElfSundae)
 
-#4.0.0
+# 4.0.0
 ------
 
 - [#4527](https://github.com/AFNetworking/AFNetworking/pull/4527): Prepare 4.0.0. by [jshier](https://github.com/jshier)
