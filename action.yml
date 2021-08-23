@@ -4,7 +4,7 @@ description: 'Generates changelog on a pull request automatically'
 inputs:
   token:
     description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
-    required: true
+    required: false
     default: ${{ github.token }}
 
   outputFile:
@@ -21,7 +21,7 @@ inputs:
   
   complete:
     description: 'Whether to generate the complete changelog. This is not recommended as it will fetch all tags and all pull requests. Complete and since cannot be used together.'
-    required: true
+    required: false
     default: 'false'
 
   nextTag:
