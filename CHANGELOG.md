@@ -1,4 +1,9 @@
 
+# v1.3.2
+------
+
+- [#33](https://github.com/tahirmt/changelog-generator/pull/33): Make the parameters with default values optional (#4) by [tahirmt](https://github.com/tahirmt)
+
 # v1.3.1
 ------
 
