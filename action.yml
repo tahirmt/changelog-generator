@@ -80,7 +80,18 @@ runs:
         # We use array because that's the only clean way to construct a command while preserving spaces
         # https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable
 
-        command=("${{ github.action_path }}/changelog")
+        command=()
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+          # macos. Use pre-built binary
+          command+=("${{ github.action_path }}/changelog")
+        else
+          # linux. Build the binary and run
+          command+=("swift")
+          command+=("run")
+          command+=("--package-path=${{ github.action_path }}")
+          command+=("changelog")
+        fi
+
         command+=("generate")
 
         if [ -z "$repository" ]; then
