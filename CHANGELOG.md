@@ -1,4 +1,9 @@
 
+# v2
+------
+
+- [#35](https://github.com/tahirmt/changelog-generator/pull/35): Linux support by [tahirmt](https://github.com/tahirmt)
+
 # v1.3.2
 ------
 
