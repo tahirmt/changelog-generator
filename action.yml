@@ -86,6 +86,7 @@ runs:
           command+=("${{ github.action_path }}/changelog")
         else
           # linux. Build the binary and run
+          ls ${{ github.action_path }}
           command+=("swift run --package-path ${{ github.action_path }} changelog")
         fi
 
