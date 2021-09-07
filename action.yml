@@ -87,7 +87,10 @@ runs:
         else
           # linux. Build the binary and run
           ls ${{ github.action_path }}
-          command+=("swift run --package-path ${{ github.action_path }} changelog")
+          command+=("swift")
+          command+=("run")
+          command+=("--package-path=${{ github.action_path }}")
+          command+=("changelog")
         fi
 
         command+=("generate")
