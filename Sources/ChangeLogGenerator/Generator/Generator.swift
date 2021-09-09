@@ -292,7 +292,7 @@ private struct ChangelogEntry {
 
             pulls = remaining
 
-            groups.append(PullRequestGroup(name: label.capitalized, pullRequests: matching))
+            groups.append(PullRequestGroup(name: label.firstLetterCapitalized, pullRequests: matching))
         }
 
         if pulls.isEmpty == false {
