@@ -1,4 +1,9 @@
 
+# v2.1
+------
+
+- [#37](https://github.com/tahirmt/changelog-generator/pull/37): Only capitalize first letter of the label by [tahirmt](https://github.com/tahirmt)
+
 # v2
 ------
 
