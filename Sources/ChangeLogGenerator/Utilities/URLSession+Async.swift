@@ -16,7 +16,7 @@ enum URLSessionError: Error {
 
 extension URLSession {
     public func dataAsync(for request: URLRequest) async throws -> (Data, URLResponse) {
-        if #available(iOS 15, macOS 12, *) {
+        if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
             return try await data(for: request)
         }
         else {

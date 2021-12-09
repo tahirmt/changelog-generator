@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         runner: ["macos-11", "ubuntu-latest"]
     runs-on: ${{ matrix.runner }}
@@ -27,6 +28,9 @@ jobs:
     - name: Xcode select
       if: ${{ matrix.runner == 'macos-11' }}
       run: sudo xcode-select --switch /Applications/Xcode_13.2.app/Contents/Developer
+
+    - name: Swift version
+      run: swift --version
 
     - name: Build
       run: swift build -v
