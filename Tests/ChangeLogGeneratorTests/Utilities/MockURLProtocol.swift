@@ -27,9 +27,9 @@ class MockURLProtocol: URLProtocol {
         didSet {
             responseData = responseJsonFiles.compactMap { (fileName: String) -> Data? in
                 Bundle.module.url(forResource: fileName, withExtension: "json")
-                    .map {
+                    .flatMap {
                         try? Data(contentsOf: $0)
-                    } as? Data
+                    }
             }
         }
     }

@@ -49,18 +49,11 @@ final class PaginationFetcherSpec: QuickSpec {
                 }
 
                 it("should load all pages") {
-                    var pageResult: Result<[MockStruct], APIError>?
-
-                    subject.fetchAllPages { result in
-                        pageResult = result
+                    let data: [MockStruct] = try awaitAsync {
+                        try await subject.fetchAllPages()
                     }
 
-                    expect(pageResult).toEventuallyNot(beNil())
-
-                    let data = try? pageResult?.get()
-
-                    expect(data).toNot(beNil())
-                    expect(data?.count) == 17
+                    expect(data.count) == 17
                 }
 
                 it("should fail if a page isn't fetched") {
@@ -70,19 +63,18 @@ final class PaginationFetcherSpec: QuickSpec {
                         (404, Data())
                     }
 
-                    var pageResult: Result<[MockStruct], APIError>?
+                    do {
+                        let _: [MockStruct] = try awaitAsync {
+                            try await subject.fetchAllPages()
+                        }
 
-                    subject.fetchAllPages { result in
-                        pageResult = result
-                    }
-
-                    expect(pageResult).toEventuallyNot(beNil())
-
-                    switch pageResult! {
-                    case .success:
                         fail("expected failure")
-                    case .failure(let error):
+                    }
+                    catch let error as APIError {
                         expect(error) == .notFound
+                    }
+                    catch {
+                        fail(error.localizedDescription)
                     }
                 }
             }
@@ -93,18 +85,11 @@ final class PaginationFetcherSpec: QuickSpec {
                 }
 
                 it("should load pages") {
-                    var pageResult: Result<[MockStruct], APIError>?
-
-                    subject.fetchAllPages { result in
-                        pageResult = result
+                    let data: [MockStruct] = try awaitAsync {
+                        try await subject.fetchAllPages()
                     }
 
-                    expect(pageResult).toEventuallyNot(beNil())
-
-                    let data = try? pageResult?.get()
-
-                    expect(data).toNot(beNil())
-                    expect(data?.count) == 4
+                    expect(data.count) == 4
                 }
             }
 
@@ -114,20 +99,13 @@ final class PaginationFetcherSpec: QuickSpec {
                 }
 
                 it("should load all pages") {
-                    var pageResult: Result<[MockStruct], APIError>?
-
-                    subject.fetchAllPages { (result) -> Bool in
-                        result.count < 6
-                    } completionHandler: { result in
-                        pageResult = result
+                    let data: [MockStruct] = try awaitAsync {
+                        try await subject.fetchAllPages {
+                            $0.count < 6
+                        }
                     }
 
-                    expect(pageResult).toEventuallyNot(beNil())
-
-                    let data = try? pageResult?.get()
-
-                    expect(data).toNot(beNil())
-                    expect(data?.count) == 6
+                    expect(data.count) == 6
                 }
             }
         }

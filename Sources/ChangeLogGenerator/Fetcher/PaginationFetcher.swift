@@ -19,11 +19,6 @@ class PaginationFetcher<T: Decodable> {
 
     private let maximumNumberOfPages: Int?
     private let queryItems: [URLQueryItem]
-    private var currentPage = 1
-
-    fileprivate var allObjects: [T] = []
-    fileprivate var resultHandler: ((Result<[T], APIError>) -> Void)?
-    fileprivate var intermediateResultHandler: (([T]) -> Bool)?
 
     // MARK: Initialization
 
@@ -43,84 +38,54 @@ class PaginationFetcher<T: Decodable> {
         self.maximumNumberOfPages = maximumNumberOfPages
     }
 
-    /// Fetches all pages until no more data is available
-    /// - Parameter completionHandler: will be called with all the pages or error if any of the requests fail
-    /// - Parameter intermediateResultHandler: When set this will get the result after every page fetch. Return true to fetch next page otherwise the load operation will end immediately
-    func fetchAllPages(intermediateResultHandler: (([T]) -> Bool)? = nil, completionHandler: @escaping (Result<[T], APIError>) -> Void) {
-        resultHandler = completionHandler
-        self.intermediateResultHandler = intermediateResultHandler
+    // MARK: Async/Await
 
-        fetchNextPage()
+    func fetchAllPages(intermediateResultHandler: (([T]) -> Bool)? = nil) async throws -> [T] {
+        var page = 1
+        let shouldFetchNextPageValue: ([T], [T]?, Int) -> Bool = { allData, pageData, currentPage in
+            guard let data = pageData else {
+                // there is no data so we haven't fetched anything yet
+                return true
+            }
+
+            if data.count < self.pageSize {
+                // received data is less than page size. Reached the end
+                return false
+            }
+            else if let maxPages = self.maximumNumberOfPages, currentPage >= maxPages {
+                // the maximum number of pages have been fetched
+                return false
+            }
+            else {
+                // check wether we should fetch the next page
+                return intermediateResultHandler?(allData) ?? true
+            }
+        }
+
+        var allData = [T]()
+        var shouldFetch = shouldFetchNextPageValue(allData, nil, page)
+        while shouldFetch {
+            let pageResult = try await fetch(page: page)
+            allData.append(contentsOf: pageResult)
+            shouldFetch = shouldFetchNextPageValue(allData, pageResult, page)
+            page += 1
+        }
+
+        return allData
     }
 
-    /// Fetch the given page
-    /// - Parameters:
-    ///   - page: page number to fetch
-    ///   - completionHandler: will be called with an array of result
-    func fetch(page: Int, completionHandler: @escaping (Result<[T], APIError>) -> Void) {
+    func fetch(page: Int) async throws -> [T] {
         let queryItems = [
             URLQueryItem(name: "per_page", value: "\(pageSize)"),
             URLQueryItem(name: "page", value: "\(page)")
         ]
 
-        fetchFromFetcher(additionalParams: queryItems, completionHandler: completionHandler)
+        return try await fetchFromFetcher(additionalParams: queryItems)
     }
 
-    // MARK: - Private
-
-    private func fetchNextPage() {
-        fetch(page: currentPage) { result in
-            switch result {
-            case .failure(let error):
-                Logger.log("got failure \(error)")
-                self.finish(error: error)
-            case .success(let data):
-                self.allObjects.append(contentsOf: data)
-
-                if data.count < self.pageSize {
-                    self.finish()
-                }
-                else if let maxPages = self.maximumNumberOfPages, self.currentPage >= maxPages {
-                    self.finish()
-                }
-                else {
-                    if self.intermediateResultHandler?(self.allObjects) ?? true {
-                        self.currentPage += 1
-                        self.fetchNextPage()
-                    }
-                    else {
-                        self.finish()
-                    }
-                }
-            }
-        }
-    }
-
-    private func finish(error: APIError? = nil) {
-        if let error = error {
-            resultHandler?(.failure(error))
-        }
-        else {
-            resultHandler?(.success(allObjects))
-        }
-
-        currentPage = 1
-        allObjects = []
-        resultHandler = nil
-    }
-
-    fileprivate func fetchFromFetcher<Data: Decodable>(additionalParams: [URLQueryItem] = [], completionHandler: @escaping (Result<Data, APIError>) -> Void) {
+    fileprivate func fetchFromFetcher<Data: Decodable>(additionalParams: [URLQueryItem] = []) async throws -> Data {
         let fetcher = Fetcher<Data>(url: url, headers: headers, queryItems: queryItems + additionalParams, session: session)
-
-        do {
-            try fetcher.fetch(completionHandler: completionHandler)
-        }
-        catch let error as APIError {
-            completionHandler(.failure(error))
-        }
-        catch  {
-            completionHandler(.failure(.error(error)))
-        }
+        return try await fetcher.fetch()
     }
 }
 
@@ -128,14 +93,13 @@ class PaginationFetcher<T: Decodable> {
 
 /// A fetcher for search results
 final class SearchResultsFetcher<T: Decodable>: PaginationFetcher<T> {
-    override func fetch(page: Int, completionHandler: @escaping (Result<[T], APIError>) -> Void) {
+    override func fetch(page: Int) async throws -> [T] {
         let queryItems = [
             URLQueryItem(name: "per_page", value: "\(pageSize)"),
             URLQueryItem(name: "page", value: "\(page)")
         ]
 
-        fetchFromFetcher(additionalParams: queryItems) { (result: Result<SearchResult<T>, APIError>) in
-            completionHandler(result.map { $0.items })
-        }
+        let result: SearchResult<T> = try await fetchFromFetcher(additionalParams: queryItems)
+        return result.items
     }
 }

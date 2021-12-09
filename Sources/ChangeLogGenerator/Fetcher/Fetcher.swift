@@ -68,8 +68,7 @@ struct Fetcher<Data: Decodable> {
 
     // MARK: Fetcher
 
-    @discardableResult
-    func fetch(completionHandler: @escaping (Result<Data, APIError>) -> Void) throws -> URLSessionDataTask {
+    func fetch() async throws -> Data {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw APIError.invalidUrl
         }
@@ -86,42 +85,50 @@ struct Fetcher<Data: Decodable> {
         }
 
         Logger.log(level: .verbose, "Fetch data from", url)
-        let task = session.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completionHandler(.failure(.error(error)))
-                return
-            }
 
-            if let urlResponse = response as? HTTPURLResponse, urlResponse.statusCode == 404 {
-                Logger.log(level: .verbose, "404 - not found at", url)
-                completionHandler(.failure(.notFound))
-                return
-            }
+        let (data, response) = try await session.dataAsync(for: request)
 
-            guard let data = data else {
-                completionHandler(.failure(.badData))
-                return
-            }
-
-            do {
-                Logger.log(level: .verbose, "received")
-                Logger.log(level: .verbose, String(data: data, encoding: .utf8) ?? "")
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .formatted(.formatter)
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-                let objects = try decoder.decode(Data.self, from: data)
-
-                completionHandler(.success(objects))
-            }
-            catch {
-                Logger.log(level: .verbose, "decoding error", error.localizedDescription)
-                completionHandler(.failure(.decodingError(error)))
-            }
+        if let urlResponse = response as? HTTPURLResponse, urlResponse.statusCode == 404 {
+            Logger.log(level: .verbose, "404 - not found at", url)
+            throw APIError.notFound
         }
 
-        task.resume()
+        Logger.log(level: .verbose, "received")
+        Logger.log(level: .verbose, String(data: data, encoding: .utf8) ?? "")
 
-        return task
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(.formatter)
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode(Data.self, from: data)
+    }
+}
+
+enum URLSessionError: Error {
+    case emptyData
+}
+
+extension URLSession {
+    public func dataAsync(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if #available(iOS 15, macOS 12, *) {
+            return try await data(for: request)
+        }
+        else {
+            return try await withUnsafeThrowingContinuation { continuation in
+                let task = dataTask(with: request) { data, response, error in
+                    if let data = data, let response = response {
+                        continuation.resume(returning: (data, response))
+                    }
+                    else if let error = error {
+                        continuation.resume(throwing: error)
+                    }
+                    else {
+                        continuation.resume(throwing: URLSessionError.emptyData)
+                    }
+                }
+
+                task.resume()
+            }
+        }
     }
 }

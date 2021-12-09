@@ -50,8 +50,17 @@ struct GitHub {
             "Accept": "application/vnd.github.v3+json",
         ]
     }
+}
 
-    // MARK: Helper
+// MARK: Helper
+
+extension GitHub {
+    private func createBaseUrl(for endpoint: Endpoint) throws -> URL {
+        guard let url = URL(string: createBaseUrl(for: endpoint)) else {
+            throw APIError.invalidUrl
+        }
+        return url
+    }
 
     private func createBaseUrl(for endpoint: Endpoint) -> String {
         switch endpoint {
@@ -78,90 +87,64 @@ struct GitHub {
             ].joined(separator: "/")
         }
     }
+}
 
+// MARK: - Async/Await
+
+extension GitHub {
     /// Fetches all pages from the given endpoint
     /// - Parameters:
     ///   - endpoint: the endpoint to fetch from
     ///   - maximumNumberOfPages: maximum number of pages to fetch
     ///   - intermediateResultHandler: return true if the next page should be loaded.
-    ///   - completionHandler: will be called with the result of all pages once
     func fetch<T: Decodable>(from endpoint: Endpoint,
                              maximumNumberOfPages: Int? = nil,
-                             intermediateResultHandler: (([T]) -> Bool)? = nil,
-                             completionHandler: @escaping (Result<[T], APIError>) -> Void) {
-        guard let url = URL(string: createBaseUrl(for: endpoint)) else {
-            completionHandler(.failure(.invalidUrl))
-            return
-        }
-
+                             intermediateResultHandler: (([T]) -> Bool)? = nil) async throws -> [T] {
+        let url: URL = try createBaseUrl(for: endpoint)
         let fetcher = PaginationFetcher<T>(url: url,
                                            headers: headers,
                                            params: params,
                                            maximumNumberOfPages: maximumNumberOfPages,
                                            session: session)
-        fetcher.fetchAllPages(intermediateResultHandler: intermediateResultHandler, completionHandler: completionHandler)
+        return try await fetcher.fetchAllPages(intermediateResultHandler: intermediateResultHandler)
     }
 
     /// Fetch the data from the given url. The decoding of the type is done internally
     /// - Parameters:
     ///   - url: url to fetch from
-    ///   - completionHandler: will be called with the parsed object or error
-    func fetch<T: Decodable>(from url: URL,
-                             completionHandler: @escaping (Result<T, APIError>) -> Void) {
+    func fetch<T: Decodable>(from url: URL) async throws -> T {
         let fetcher = Fetcher<T>(url: url,
                                  headers: headers,
                                  params: params,
                                  session: session)
-        do {
-            try fetcher.fetch(completionHandler: completionHandler)
-        }
-        catch let error as APIError {
-            completionHandler(.failure(error))
-        }
-        catch  {
-            completionHandler(.failure(.error(error)))
-        }
+        return try await fetcher.fetch()
     }
 
     /// Fetch the first item of the first page
     /// - Parameters:
     ///   - endpoint: endpoint to fetch from
-    ///   - completionHandler: will be called with an array of one item or empty
-    func fetchFirst<T: Decodable>(from endpoint: Endpoint, completionHandler: @escaping (Result<[T], APIError>) -> Void) {
-        guard let url = URL(string: createBaseUrl(for: endpoint)) else {
-            completionHandler(.failure(.invalidUrl))
-            return
-        }
-
+    func fetchFirst<T: Decodable>(from endpoint: Endpoint) async throws -> [T] {
+        let url: URL = try createBaseUrl(for: endpoint)
         let fetcher = PaginationFetcher<T>(url: url,
                                            headers: headers,
                                            params: params,
                                            pageSize: 1,
                                            session: session)
 
-        fetcher.fetch(page: 1, completionHandler: completionHandler)
+        return try await fetcher.fetch(page: 1)
     }
 
     /// Fetches the latest release from github
-    func fetchLatestRelease(completionHandler: @escaping (Result<Release, APIError>) -> Void) {
-        guard let url = URL(string: createBaseUrl(for: .releases)) else {
-            completionHandler(.failure(.invalidUrl))
-            return
-        }
-
-        fetch(from: url.appendingPathComponent("latest"), completionHandler: completionHandler)
+    func fetchLatestRelease() async throws -> Release {
+        let url: URL = try createBaseUrl(for: .releases)
+        return try await fetch(from: url.appendingPathComponent("latest"))
     }
 
     /// Fetch pull requests merged after the given date
     /// - Parameters:
     ///   - date: date to fetch pull requests after
-    ///   - completionHandler: will be called with the result
-    func fetchPullRequests(mergedAfter date: Date, maximumNumberOfPages: Int? = nil, completionHandler: @escaping (Result<[PullRequest], APIError>) -> Void) {
-        guard let url = URL(string: createBaseUrl(for: .search)) else {
-            completionHandler(.failure(.invalidUrl))
-            return
-        }
-
+    func fetchPullRequests(mergedAfter date: Date, maximumNumberOfPages: Int? = nil) async throws -> [PullRequest] {
+        let url: URL = try createBaseUrl(for: .search)
         let query = [
             "repo:\(repository)",
             "is:pr",
@@ -179,7 +162,7 @@ struct GitHub {
             params: params,
             maximumNumberOfPages: maximumNumberOfPages,
             session: session)
-        fetcher.fetchAllPages(completionHandler: completionHandler)
+        return try await fetcher.fetchAllPages()
     }
 
     /// Fetch comparison between two refs
@@ -187,13 +170,8 @@ struct GitHub {
     ///   - base: the base ref. It can be a branch, tag or sha
     ///   - head: the head ref. It can be a branch, tag or sha
     ///   - maximumNumberOfPages: The maximum number of pages to fetch
-    ///   - completionHandler: will be called with the comparison result
-    func fetchComparison(from base: String, to head: String, maximumNumberOfPages: Int? = nil, completionHandler: @escaping (Result<Comparison, APIError>) -> Void) {
-        guard let url = URL(string: createBaseUrl(for: .compare(base, head))) else {
-            completionHandler(.failure(.invalidUrl))
-            return
-        }
-
+    func fetchComparison(from base: String, to head: String, maximumNumberOfPages: Int? = nil) async throws -> Comparison {
+        let url: URL = try createBaseUrl(for: .compare(base, head))
         let fetcher = ComparisonFetcher(
             url: url,
             headers: headers,
@@ -201,6 +179,6 @@ struct GitHub {
             maximumNumberOfPages: maximumNumberOfPages,
             session: session)
 
-        fetcher.fetchAllPages(completionHandler: completionHandler)
+        return try await fetcher.fetchAllPages()
     }
 }
