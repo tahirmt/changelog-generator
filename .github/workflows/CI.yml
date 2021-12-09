@@ -26,7 +26,7 @@ jobs:
     
     - name: Xcode select
       if: ${{ matrix.runner == 'macos-11' }}
-      run: sudo xcode-select --switch /Applications/Xcode-13.2.app/Contents/Developer
+      run: sudo xcode-select --switch /Applications/Xcode_13.2.app/Contents/Developer
 
     - name: Build
       run: swift build -v
