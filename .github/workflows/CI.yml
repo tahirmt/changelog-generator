@@ -23,7 +23,11 @@ jobs:
         key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }} 
         restore-keys: |
           ${{ runner.os }}-swift-
-      
+    
+    - name: Xcode select
+      if: ${{ matrix.runner == 'macos-latest' }}
+      run: sudo xcode-select --switch /Applications/Xcode-13.2.app/Contents/Developer
+
     - name: Build
       run: swift build -v
     - name: Run tests
