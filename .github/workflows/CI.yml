@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        runner: ["macos-latest", "ubuntu-latest"]
+        runner: ["macos-11", "ubuntu-latest"]
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -25,7 +25,7 @@ jobs:
           ${{ runner.os }}-swift-
     
     - name: Xcode select
-      if: ${{ matrix.runner == 'macos-latest' }}
+      if: ${{ matrix.runner == 'macos-11' }}
       run: sudo xcode-select --switch /Applications/Xcode-13.2.app/Contents/Developer
 
     - name: Build
