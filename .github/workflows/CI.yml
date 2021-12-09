@@ -29,6 +29,12 @@ jobs:
       if: ${{ matrix.runner == 'macos-11' }}
       run: sudo xcode-select --switch /Applications/Xcode_13.2.app/Contents/Developer
 
+    - name: Swift setup
+      if: ${{ matrix.runner == 'ubuntu-latest' }}
+      uses: YOCKOW/Action-setup-swift@v1
+      with:
+        swift-version: '5.5.2'
+
     - name: Swift version
       run: swift --version
 
