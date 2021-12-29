@@ -21,8 +21,6 @@ class ComparisonFetcher {
     private let queryItems: [URLQueryItem]
     private var currentPage = 1
 
-    fileprivate var intermediateResultHandler: ((Comparison) -> Bool)?
-
     // MARK: Initialization
 
     init(url: URL,
