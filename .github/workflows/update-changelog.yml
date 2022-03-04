@@ -29,15 +29,26 @@ jobs:
     
     - name: Create branch
       run: git checkout -b create-release
-      
+
+    - name: Create binary
+      if: github.event.inputs.createBuild == 'true'
+      run: |
+        swift build -c release --arch arm64 --arch x86_64
+        cp .build/apple/Products/Release/changelog ./
+
     - name: Update changelog
       run: |
-        ./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
-    
-    - name: Create build
-      if: github.event.inputs.createBuild == 'true'
-      run: make
-    
+        MAC_OS_VERSION=$([[ "$OSTYPE" == "darwin"* ]] && sw_vers -productVersion)
+        major="$(echo $MAC_OS_VERSION | awk 'BEGIN { FS="." } { print $1 }')"
+        # For macOS 11 or lower while async/await works, it doesn't seem to work using the precompiled binary
+        can_run_compiled_binary="$(if [[ $major -lt 12 ]]; then echo 'false'; else echo 'true'; fi)"
+
+        if [[ "$OSTYPE" == "darwin"* && "$can_run_compiled_binary" == "true" ]]; then
+          ./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
+        else
+          swift run changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
+        fi
+
     - name: Push branch
       run: |
         git push origin create-release --force 
