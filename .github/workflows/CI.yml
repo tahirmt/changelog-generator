@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: ["macos-11", "ubuntu-latest"]
+        runner: ["macos-latest", "ubuntu-latest"]
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -24,10 +24,6 @@ jobs:
         key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }} 
         restore-keys: |
           ${{ runner.os }}-swift-
-    
-    - name: Xcode select
-      if: ${{ matrix.runner == 'macos-11' }}
-      run: sudo xcode-select --switch /Applications/Xcode_13.2.app/Contents/Developer
 
     - name: Swift version
       run: swift --version
