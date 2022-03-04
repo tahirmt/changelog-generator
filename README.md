@@ -7,7 +7,7 @@ A swift package to generate change log for github repositories. The change log c
 You can use the precompiled executable `changelog` or ues `make` to create a new release. You can also use `swift run changelog` to run the script.
 
 ```
-./changelog generate --owner=AFNetworking --repo=AFNetworking --type=complete --output=./CHANGELOG.md
+./changelog generate --repository AFNetworking/AFNetworking --type=complete --output=./CHANGELOG.md
 ```
 
 It procuces an output similar to below

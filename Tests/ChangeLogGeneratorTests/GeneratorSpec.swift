@@ -39,17 +39,9 @@ final class GeneratorSpec: QuickSpec {
                         URL(string: "https://api.github.com/repos/AFNetworking/AFNetworking/tags?per_page=100&page=2")!: "tags_2",
                     ]
 
-                    var result: Result<String, Error>?
-                    subject.generateCompleteChangeLog {
-                        result = $0
+                    let changelog = try awaitAsync {
+                        try await subject.generateCompleteChangeLog()
                     }
-
-                    expect(result).toEventuallyNot(beNil())
-                    expect {
-                        _ = try result?.get()
-                    }.toNot(throwError())
-
-                    let changelog = try? result?.get()
 
                     expect(changelog) == Bundle.module.url(forResource: "CHANGELOG", withExtension: "md").map {
                         try? String(contentsOf: $0)
@@ -62,17 +54,9 @@ final class GeneratorSpec: QuickSpec {
                         "pull_request_search_2"
                     ]
 
-                    var result: Result<String, Error>?
-                    subject.generateChangeLogSinceLatestRelease {
-                        result = $0
+                    let changelog = try awaitAsync {
+                        try await subject.generateChangeLogSinceLatestRelease()
                     }
-
-                    expect(result).toEventuallyNot(beNil())
-                    expect {
-                        _ = try result?.get()
-                    }.toNot(throwError())
-
-                    let changelog = try? result?.get()
 
                     expect(changelog) == Bundle.module.url(forResource: "CHANGELOG_release", withExtension: "md").map {
                         try? String(contentsOf: $0)
@@ -88,18 +72,9 @@ final class GeneratorSpec: QuickSpec {
                         "pull_requests_4",
                     ]
 
-                    var result: Result<String, Error>?
-
-                    subject.generateChangeLogSince(tag: "3.2.0") {
-                        result = $0
+                    let changelog = try awaitAsync {
+                        try await subject.generateChangeLogSince(tag: "3.2.0")
                     }
-
-                    expect(result).toEventuallyNot(beNil())
-                    expect {
-                        _ = try result?.get()
-                    }.toNot(throwError())
-
-                    let changelog = try? result?.get()
 
                     expect(changelog) == Bundle.module.url(forResource: "CHANGELOG_tag", withExtension: "md").map {
                         try? String(contentsOf: $0)
@@ -122,12 +97,9 @@ final class GeneratorSpec: QuickSpec {
 
                 context("for complete changelog") {
                     it("should send token in headers") {
-                        var result: Result<String, Error>?
-                        subject.generateCompleteChangeLog {
-                            result = $0
+                        _ = try awaitAsync {
+                            try await subject.generateCompleteChangeLog()
                         }
-
-                        expect(result).toEventuallyNot(beNil())
 
                         expect(MockURLProtocol.requestsCalled).toNot(beEmpty())
 
@@ -142,12 +114,9 @@ final class GeneratorSpec: QuickSpec {
 
                 context("for latest release") {
                     it("should send token in headers") {
-                        var result: Result<String, Error>?
-                        subject.generateChangeLogSinceLatestRelease {
-                            result = $0
+                        _ = try? awaitAsync {
+                            try await subject.generateChangeLogSinceLatestRelease()
                         }
-
-                        expect(result).toEventuallyNot(beNil())
 
                         expect(MockURLProtocol.requestsCalled).toNot(beEmpty())
 
@@ -162,12 +131,9 @@ final class GeneratorSpec: QuickSpec {
 
                 context("for since tag") {
                     it("should send token in headers") {
-                        var result: Result<String, Error>?
-                        subject.generateChangeLogSince(tag: "3.2.0") {
-                            result = $0
+                        _ = try awaitAsync {
+                            try await subject.generateChangeLogSince(tag: "3.2.0")
                         }
-
-                        expect(result).toEventuallyNot(beNil())
 
                         expect(MockURLProtocol.requestsCalled).toNot(beEmpty())
 
@@ -203,19 +169,11 @@ final class GeneratorSpec: QuickSpec {
                             URL(string: "https://api.github.com/repos/AFNetworking/AFNetworking/tags?per_page=100&page=2")!: "tags_2",
                         ]
 
-                        var result: Result<String, Error>?
-                        subject.generateCompleteChangeLog {
-                            result = $0
+                        let changelog = try awaitAsync {
+                            try await subject.generateCompleteChangeLog()
                         }
 
-                        expect(result).toEventuallyNot(beNil())
-                        expect {
-                            _ = try result?.get()
-                        }.toNot(throwError())
-
-                        let changelog = try? result?.get()
-
-                        expect(changelog?.contains("Fixed CLANG_ENABLE_CODE_COVERAGE flag so release can be made")).to(beFalse())
+                        expect(changelog.contains("Fixed CLANG_ENABLE_CODE_COVERAGE flag so release can be made")).to(beFalse())
                     }
                 }
             }

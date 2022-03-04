@@ -28,7 +28,9 @@ final class FetcherSpec: QuickSpec {
             }
 
             it("should have correct url") {
-                _ = try? subject.fetch { _ in }
+                _ = try? awaitAsync {
+                    try await subject.fetch()
+                }
 
                 expect(MockURLProtocol.requestsCalled).toEventuallyNot(beEmpty())
 
@@ -46,7 +48,9 @@ final class FetcherSpec: QuickSpec {
                     headers: ["headerkey": "value"],
                     params: ["q": "v"])
 
-                _ = try? subject.fetch { _ in }
+                _ = try? awaitAsync {
+                    try await subject.fetch()
+                }
 
                 expect(MockURLProtocol.requestsCalled).toEventuallyNot(beEmpty())
 
@@ -58,23 +62,24 @@ final class FetcherSpec: QuickSpec {
                 ]
             }
 
-            func expectResultEqual(_ expectedResult: Result<MockStruct, APIError>, file: FileString = #file, line: UInt = #line) {
-                var result: Result<MockStruct, APIError>?
+            func expectResultEqual(_ expectedResult: Result<MockStruct, APIError>, file: FileString = #file, line: UInt = #line) throws {
+                let result: Result<MockStruct, APIError>
 
                 do {
-                    try subject.fetch { (apiResult: Result<MockStruct, APIError>) in
-                        result = apiResult
+                    let data = try awaitAsync {
+                        try await subject.fetch()
                     }
+
+                    result = .success(data)
+                }
+                catch let error as APIError {
+                    result = .failure(error)
                 }
                 catch {
-                    fail(error.localizedDescription)
+                    throw error
                 }
 
-                expect(result).toEventuallyNot(beNil())
-
-                guard result != nil else { return }
-
-                switch (result!, expectedResult) {
+                switch (result, expectedResult) {
                 case (.failure(let lhs), .failure(let rhs)):
                     expect(lhs) == rhs
                 case (.success(let lhs), .success(let rhs)):
@@ -93,7 +98,7 @@ final class FetcherSpec: QuickSpec {
                 """.data(using: .utf8)!
                 ]
 
-                expectResultEqual(.success(MockStruct(value: "Hello")))
+                try expectResultEqual(.success(MockStruct(value: "Hello")))
             }
 
             it("should return parsing error if invalid data") {
@@ -105,7 +110,16 @@ final class FetcherSpec: QuickSpec {
                 """.data(using: .utf8)!
                 ]
 
-                expectResultEqual(.failure(.decodingError(placeholderError)))
+                do {
+                    try expectResultEqual(.failure(.decodingError(placeholderError)))
+                    fail("expected failure")
+                }
+                catch let DecodingError.keyNotFound(key, _) {
+                    expect(key.stringValue) == "value"
+                }
+                catch {
+                    throw error
+                }
             }
 
             it("should return correct error if not found") {
@@ -113,7 +127,7 @@ final class FetcherSpec: QuickSpec {
                     (404, Data())
                 }
 
-                expectResultEqual(.failure(.notFound))
+                try expectResultEqual(.failure(.notFound))
             }
         }
     }

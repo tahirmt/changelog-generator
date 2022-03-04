@@ -21,10 +21,6 @@ class ComparisonFetcher {
     private let queryItems: [URLQueryItem]
     private var currentPage = 1
 
-    fileprivate var result: Comparison?
-    fileprivate var resultHandler: ((Result<Comparison, APIError>) -> Void)?
-    fileprivate var intermediateResultHandler: ((Comparison) -> Bool)?
-
     // MARK: Initialization
 
     init(url: URL,
@@ -44,90 +40,65 @@ class ComparisonFetcher {
     }
 
     /// Fetches all pages until no more data is available
-    /// - Parameter completionHandler: will be called with all the pages or error if any of the requests fail
     /// - Parameter intermediateResultHandler: When set this will get the result after every page fetch. Return true to fetch next page otherwise the load operation will end immediately
-    func fetchAllPages(intermediateResultHandler: ((Comparison) -> Bool)? = nil, completionHandler: @escaping (Result<Comparison, APIError>) -> Void) {
-        resultHandler = completionHandler
-        self.intermediateResultHandler = intermediateResultHandler
+    func fetchAllPages(intermediateResultHandler: ((Comparison) -> Bool)? = nil) async throws -> Comparison {
+        var page = 1
+        let shouldFetchNextPageValue: (Comparison?, Int) -> Bool = { comparison, currentPage in
+            guard let comparison = comparison else {
+                // there is no data so we haven't fetched anything yet
+                return true
+            }
 
-        fetchNextPage()
+            if comparison.commits.count < self.pageSize || comparison.commits.count == comparison.totalCommits {
+                // we have fetched all pages
+                return false
+            }
+            else if let maxPages = self.maximumNumberOfPages, currentPage >= maxPages {
+                // the maximum number of pages have been fetched
+                return false
+            }
+            else {
+                // check wether we should fetch the next page
+                return intermediateResultHandler?(comparison) ?? true
+            }
+        }
+
+        var finalResult: Comparison?
+        var shouldFetch = shouldFetchNextPageValue(finalResult, page)
+        while shouldFetch {
+            let pageResult = try await fetch(page: page)
+            if finalResult == nil {
+                finalResult = pageResult
+            }
+            else {
+                finalResult?.commits.append(contentsOf: pageResult.commits)
+            }
+
+            shouldFetch = shouldFetchNextPageValue(finalResult, page)
+            page += 1
+        }
+
+        if let finalResult = finalResult {
+            return finalResult
+        }
+
+        throw APIError.badData
     }
 
     /// Fetch the given page
     /// - Parameters:
     ///   - page: page number to fetch
-    ///   - completionHandler: will be called with an array of result
-    func fetch(page: Int, completionHandler: @escaping (Result<Comparison, APIError>) -> Void) {
+    func fetch(page: Int) async throws -> Comparison {
         let queryItems = [
             URLQueryItem(name: "per_page", value: "\(pageSize)"),
             URLQueryItem(name: "page", value: "\(page)")
         ]
 
-        fetchFromFetcher(additionalParams: queryItems, completionHandler: completionHandler)
+        return try await fetchFromFetcher(additionalParams: queryItems)
     }
 
-    // MARK: - Private
-
-    private func fetchNextPage() {
-        fetch(page: currentPage) { result in
-            switch result {
-            case .failure(let error):
-                Logger.log("got failure \(error)")
-                self.finish(error: error)
-            case .success(let data):
-                if self.result == nil {
-                    self.result = data
-                }
-                else {
-                    self.result?.commits.append(contentsOf: data.commits)
-                }
-
-                if data.commits.count < self.pageSize || self.result?.commits.count == self.result?.totalCommits {
-                    self.finish()
-                }
-                else if let maxPages = self.maximumNumberOfPages, self.currentPage >= maxPages {
-                    self.finish()
-                }
-                else {
-                    if self.intermediateResultHandler?(self.result ?? data) ?? true {
-                        self.currentPage += 1
-                        self.fetchNextPage()
-                    }
-                    else {
-                        self.finish()
-                    }
-                }
-            }
-        }
-    }
-
-    private func finish(error: APIError? = nil) {
-        if let error = error {
-            resultHandler?(.failure(error))
-        }
-        else if let result = result {
-            resultHandler?(.success(result))
-        }
-        else {
-            resultHandler?(.failure(.badData))
-        }
-
-        currentPage = 1
-        result = nil
-        resultHandler = nil
-    }
-
-    fileprivate func fetchFromFetcher<Data: Decodable>(additionalParams: [URLQueryItem] = [], completionHandler: @escaping (Result<Data, APIError>) -> Void) {
+    fileprivate func fetchFromFetcher<Data: Decodable>(additionalParams: [URLQueryItem] = []) async throws -> Data {
         let fetcher = Fetcher<Data>(url: url, headers: headers, queryItems: queryItems + additionalParams, session: session)
-
-        do {
-            try fetcher.fetch(completionHandler: completionHandler)
-        }
-        catch let error as APIError {
-            completionHandler(.failure(error))
-        }
-        catch {
-            completionHandler(.failure(.error(error)))
-        }
+        return try await fetcher.fetch()
     }
 }

@@ -78,6 +78,28 @@ struct Generate: ParsableCommand {
     func run() throws {
         Logger.verbose = verbose
 
+        var generatorResult: Result<String, Error>?
+        let semaphore = DispatchSemaphore(value: 0)
+
+        try fetch {
+            generatorResult = $0
+            semaphore.signal()
+        }
+        semaphore.wait()
+
+        guard let result = generatorResult else {
+            throw GenerateError.invalid
+        }
+
+        switch result {
+        case .failure(let error):
+            throw error
+        case .success(let changelog):
+            try process(changelog: changelog)
+        }
+    }
+
+    private func fetch(completion: @escaping (Result<String, Error>) -> Void) throws {
         let generator = try Generator(
             repository: repository,
             token: token,
@@ -90,42 +112,30 @@ struct Generate: ParsableCommand {
 
         Logger.log(level: .verbose, "generator \(generator)")
 
-        let semaphore = DispatchSemaphore(value: 0)
-        var generatorResult: Result<String, Error>?
+        Task {
+            do {
+                let changelog: String
+                switch type {
+                case .complete:
+                    Logger.log("Fetch complete changelog")
+                    changelog = try await generator.generateCompleteChangeLog()
+                case .sinceLatestRelease:
+                    Logger.log("Fetch since latest release")
+                    changelog = try await generator.generateChangeLogSinceLatestRelease(on: branch)
+                case .sinceTag:
+                    guard let tag = tag else {
+                        throw GenerateError.missingTag
+                    }
+                    Logger.log("Fetch since \(tag)")
+                    changelog = try await generator.generateChangeLogSince(tag: tag, on: branch)
+                }
 
-        switch type {
-        case .complete:
-            generator.generateCompleteChangeLog { result in
-                generatorResult = result
-                semaphore.signal()
+                completion(.success(changelog))
             }
-        case .sinceLatestRelease:
-            generator.generateChangeLogSinceLatestRelease(on: branch) { result in
-                generatorResult = result
-                semaphore.signal()
+            catch {
+                Logger.log("Failed")
+                completion(.failure(error))
             }
-        case .sinceTag:
-            guard let tag = tag else {
-                throw GenerateError.missingTag
-            }
-
-            generator.generateChangeLogSince(tag: tag, on: branch) { result in
-                generatorResult = result
-                semaphore.signal()
-            }
-        }
-
-        semaphore.wait()
-
-        guard let result = generatorResult else {
-            throw GenerateError.invalid
-        }
-
-        switch result {
-        case .failure(let error):
-            throw error
-        case .success(let changelog):
-            try process(changelog: changelog)
         }
     }
 
