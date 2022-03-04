@@ -52,6 +52,11 @@ inputs:
   verbose:
     description: 'Enable verbose logging'
     required: false
+  
+  use-compiled:
+    description: 'Whether to use compiled executable or not'
+    required: false
+    default: 'true'
 
 outputs:
   changelog:
@@ -76,12 +81,13 @@ runs:
         verbose="${{ inputs.verbose }}"
         branch="${{ inputs.branch }}"
         excludedLabels="${{ inputs.excludedLabels }}"
+        useCompiled="${{ inputs.use-compiled }}"
 
         # We use array because that's the only clean way to construct a command while preserving spaces
         # https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable
 
         command=()
-        if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [[ "$OSTYPE" == "darwin"* && "$useCompiled" == "true" ]]; then
           # macos. Use pre-built binary
           command+=("${{ github.action_path }}/changelog")
         else
