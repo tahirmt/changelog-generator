@@ -1,11 +1,4 @@
 
-# v3
-------
-
-- [#43](https://github.com/tahirmt/changelog-generator/pull/43): Fix action by [tahirmt](https://github.com/tahirmt)
-- [#42](https://github.com/tahirmt/changelog-generator/pull/42): Test changelog by [tahirmt](https://github.com/tahirmt)
-- [#40](https://github.com/tahirmt/changelog-generator/pull/40): Rewrite api using async/await by [tahirmt](https://github.com/tahirmt)
-
 # v2.1
 ------
 
