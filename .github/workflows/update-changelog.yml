@@ -30,14 +30,16 @@ jobs:
     - name: Create branch
       run: git checkout -b create-release
       
+    - name: Make
+      if: github.event.inputs.createBuild == 'true'
+      run: |
+        swift build -c release --arch arm64 --arch x86_64
+	      cp .build/apple/Products/Release/changelog ./
+
     - name: Update changelog
       run: |
-        ./changelog --version
+        ./changelog --help
         ./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --output=./CHANGELOG.md --next-tag=v${{ github.event.inputs.version }}
-    
-    - name: Create build
-      if: github.event.inputs.createBuild == 'true'
-      run: make
     
     - name: Push branch
       run: |
