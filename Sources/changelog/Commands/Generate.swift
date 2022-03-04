@@ -73,10 +73,14 @@ struct Generate: ParsableCommand {
     @Flag(help: "Whether or not to enable verbose logging")
     var verbose: Bool = false
 
+    @Flag(help: "Disable logging apart from the changelog if changelog should be logged")
+    var disableLogging: Bool = false
+
     // MARK: - ParsableCommand
 
     func run() throws {
         Logger.verbose = verbose
+        Logger.enabled = !disableLogging
 
         var generatorResult: Result<String, Error>?
         let semaphore = DispatchSemaphore(value: 0)

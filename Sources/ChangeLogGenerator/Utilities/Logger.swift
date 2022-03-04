@@ -8,6 +8,7 @@
 import Foundation
 
 public final class Logger {
+    public static var enabled = true
     public static var verbose = false
 
     public enum Level {
@@ -16,6 +17,8 @@ public final class Logger {
     }
 
     public static func log(level: Level = .default, _ items: Any...) {
+        guard enabled else { return }
+        
         if level == .verbose && verbose == false { return }
 
         print("")

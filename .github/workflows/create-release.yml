@@ -32,7 +32,16 @@ jobs:
     - name: Changelog
       id: get-changelog
       run: |
-        output=$(./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }})
+        MAC_OS_VERSION=$([[ "$OSTYPE" == "darwin"* ]] && sw_vers -productVersion)
+        major="$(echo $MAC_OS_VERSION | awk 'BEGIN { FS="." } { print $1 }')"
+        # For macOS 11 or lower while async/await works, it doesn't seem to work using the precompiled binary
+        can_run_compiled_binary="$(if [[ $major -lt 12 ]]; then echo 'false'; else echo 'true'; fi)"
+
+        if [[ "$OSTYPE" == "darwin"* && "$can_run_compiled_binary" == "true" ]]; then
+          output=$(./changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --disable-logging)
+        else
+          output=$(swift run changelog generate --repository=${{ github.repository }} --token=${{ secrets.GITHUB_TOKEN }} --disable-logging)
+        fi
 
         echo "::set-output name=changelog::$output"
 
