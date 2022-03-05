@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  URL+EquivalentSpec.swift
 //  
 //
 //  Created by Mahmood Tahir on 2022-03-05.
