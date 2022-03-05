@@ -178,6 +178,31 @@ final class GeneratorSpec: QuickSpec {
                 }
             }
 
+            it("should generate changelog for milestone") {
+                subject = try! Generator(
+                    repository: "AFNetworking/AFNetworking",
+                    token: nil,
+                    labels: [],
+                    excludedLabels: [],
+                    filterRegEx: nil,
+                    maximumNumberOfPages: nil,
+                    nextTag: "4.0.0",
+                    includeUntagged: true)
+
+                MockURLProtocol.responseJsonForURL = [
+                    URL(string: "https://api.github.com/repos/AFNetworking/AFNetworking/milestones?state=all&direction=desc&per_page=100&page=1")!: "milestones_1",
+                    URL(string: "https://api.github.com/repos/AFNetworking/AFNetworking/issues?milestone=16&direction=desc&sort=updated&state=closed&per_page=100&page=1")!: "issues_1",
+                ]
+
+                let changelog = try awaitAsync {
+                    try await subject.generateChangeLogFor(milestone: "4.0.0")
+                }
+
+                expect(changelog) == Bundle.module.url(forResource: "CHANGELOG_milestone", withExtension: "md").map {
+                    try? String(contentsOf: $0)
+                }
+            }
+
             it("should not initialize if repository name does not match format") {
                 expect {
                     subject = try Generator(

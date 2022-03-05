@@ -10,6 +10,7 @@ import Foundation
 import FoundationNetworking
 #endif
 import Quick
+@testable import ChangeLogGenerator
 
 enum MockURLProtocolError: Error {
     case noUrl
@@ -56,7 +57,7 @@ class MockURLProtocol: URLProtocol {
         }
 
         if Self.responseJsonForURL.isEmpty == false,
-           let json = Self.responseJsonForURL[requestUrl],
+           let json = Self.responseJsonForURL.first(where: { $0.key.isEquivalent(to: requestUrl) })?.value,
            let fileUrl = Bundle.module.url(forResource: json, withExtension: "json"),
            let jsonData = try? Data(contentsOf: fileUrl),
            let response = HTTPURLResponse(url: requestUrl, statusCode: 200, httpVersion: nil, headerFields: nil) {
