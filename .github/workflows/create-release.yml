@@ -45,7 +45,7 @@ jobs:
 
         # Multiline output is not supported by GitHub Actions
         echo 'CHANGELOG_VALUE<<EOF' >> $GITHUB_ENV
-        echo "$output" >> $GITHUB_ENV
+        echo $output >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
 
         echo "::set-output name=changelog::$output"
