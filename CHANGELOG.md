@@ -1,4 +1,14 @@
 
+# v3
+------
+
+- [#47](https://github.com/tahirmt/changelog-generator/pull/47): Fix create release action not to use compiled binary if not allowed by [tahirmt](https://github.com/tahirmt)
+- [#46](https://github.com/tahirmt/changelog-generator/pull/46): Revert "Create release v3" by [tahirmt](https://github.com/tahirmt)
+- [#45](https://github.com/tahirmt/changelog-generator/pull/45): Create release v3 by [github-actions[bot]](https://github.com/apps/github-actions)
+- [#43](https://github.com/tahirmt/changelog-generator/pull/43): Fix action by [tahirmt](https://github.com/tahirmt)
+- [#42](https://github.com/tahirmt/changelog-generator/pull/42): Test changelog by [tahirmt](https://github.com/tahirmt)
+- [#40](https://github.com/tahirmt/changelog-generator/pull/40): Rewrite api using async/await by [tahirmt](https://github.com/tahirmt)
+
 # v2.1
 ------
 
