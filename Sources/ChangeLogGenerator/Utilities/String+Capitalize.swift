@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  String+Capitalize.swift
 //  
 //
 //  Created by Mahmood Tahir on 2021-09-08.

@@ -17,6 +17,8 @@ struct GitHub {
         case releases
         case search
         case compare(String, String)
+        case issues
+        case milestones
 
         var path: String {
             switch self {
@@ -30,6 +32,10 @@ struct GitHub {
                 return "search"
             case .compare:
                 return "compare"
+            case .issues:
+                return "issues"
+            case .milestones:
+                return "milestones"
             }
         }
     }
@@ -64,7 +70,7 @@ extension GitHub {
 
     private func createBaseUrl(for endpoint: Endpoint) -> String {
         switch endpoint {
-        case .pulls, .tags, .releases:
+        case .pulls, .tags, .releases, .issues, .milestones:
             return [
                 base,
                 "repos",
@@ -79,7 +85,7 @@ extension GitHub {
             ].joined(separator: "/")
         case .compare(let base, let head):
             return [
-                self.base,
+                base,
                 "repos",
                 repository,
                 endpoint.path,

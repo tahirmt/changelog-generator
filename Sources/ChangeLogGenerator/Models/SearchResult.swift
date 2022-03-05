@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  SearchResult.swift
 //  
 //
 //  Created by Mahmood Tahir on 2021-01-19.

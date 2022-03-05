@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct PullRequest: Decodable {
-    enum State: String, Decodable {
-        case closed
-        case open
-    }
+enum State: String, Decodable {
+    case closed
+    case open
+}
 
+struct PullRequest: Decodable {
     let url: String
     let htmlUrl: String
     let id: UInt64
@@ -24,8 +24,6 @@ struct PullRequest: Decodable {
     let mergeCommitSha: String?
     let labels: [Label]
     let user: User
-
-    var formattedMessage: String {
-        "- [#\(number)](\(htmlUrl)): \(title) by [\(user.login)](\(user.htmlUrl))"
-    }
 }
+
+extension PullRequest: ChangelogConvertible {}

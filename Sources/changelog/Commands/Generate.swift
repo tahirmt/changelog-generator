@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Generate.swift
 //  
 //
 //  Created by Mahmood Tahir on 2021-01-19.
@@ -14,6 +14,7 @@ private enum GenerateError: Error {
     case missingTag
     case invalid
     case encodingError
+    case missingMilestone
 }
 // MARK: - Generate
 
@@ -22,6 +23,7 @@ struct Generate: ParsableCommand {
         case complete
         case sinceLatestRelease
         case sinceTag
+        case milestone
     }
 
     // MARK: - Properties
@@ -39,6 +41,9 @@ struct Generate: ParsableCommand {
 
     @Option(help: "Whether to generate full changelog since first pull request")
     var type: LogType = .sinceLatestRelease
+
+    @Option(help: "The milestone to generate the changelog for. The type must be milestone to use this option.")
+    var milestone: String?
 
     @Option(help: "The tag to use when sinceTag type is used")
     var tag: String?
@@ -112,7 +117,7 @@ struct Generate: ParsableCommand {
             filterRegEx: filterRegEx,
             maximumNumberOfPages: maxPages,
             nextTag: nextTag,
-            includeUntagged: !excludeUntagged)
+            includeUntagged: !excludeUntagged || type == .milestone)
 
         Logger.log(level: .verbose, "generator \(generator)")
 
@@ -132,6 +137,12 @@ struct Generate: ParsableCommand {
                     }
                     Logger.log("Fetch since \(tag)")
                     changelog = try await generator.generateChangeLogSince(tag: tag, on: branch)
+                case .milestone:
+                    guard let milestone = milestone else {
+                        throw GenerateError.missingMilestone
+                    }
+                    Logger.log("Fetch milestone \(milestone)")
+                    changelog = try await generator.generateChangeLogFor(milestone: milestone)
                 }
 
                 completion(.success(changelog))
