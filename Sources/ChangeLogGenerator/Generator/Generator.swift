@@ -1,6 +1,7 @@
 import Foundation
 
 enum GeneratorError: Error {
+    case milestoneNotFound
     case invalidFormat
 }
 
@@ -77,7 +78,7 @@ public struct Generator {
         Logger.log("generating since \(tag) on branch \(branch ?? "nil")")
         let tags = try await GitHub(repository: repository, token: token)
             .fetch(from: .tags, maximumNumberOfPages: maximumNumberOfPages) { (tags: [Tag]) -> Bool in
-                tags.contains { $0.name == tag }
+                tags.contains { $0.name == tag } == false
             }
 
         guard let tag = tags.first(where: { $0.name == tag }) else {
@@ -117,6 +118,35 @@ public struct Generator {
         return createChangelog(usingTags: filteredTags, pulls: filteredPulls)
     }
 
+    /// Generate the changelog for the given milestone. This will include all the closed pull requests that were merged and belong to the given milestone
+    /// - Parameter milestone: the milestone to generate the changelog for.
+    /// - Returns: Change log string representing the merged pull requests under a milestone
+    public func generateChangeLogFor(milestone: String) async throws -> String {
+        // fetch milestone
+        let milestone: Milestone? = try await GitHub(repository: repository, token: token, params: ["state": "all", "direction": "desc"])
+            .fetch(from: .milestones, maximumNumberOfPages: maximumNumberOfPages) {
+                $0.contains { $0.title == milestone } == false
+            }
+            .first { $0.title == milestone }
+
+        guard let milestone = milestone else {
+            throw GeneratorError.milestoneNotFound
+        }
+
+        let pulls: [Issue] = try await GitHub(repository: repository,
+                                                token: token,
+                                                params: [
+                                                    "milestone": "\(milestone.number)",
+                                                    "state": "closed",
+                                                    "sort": "updated",
+                                                    "direction": "desc",
+                                                ])
+            .fetch(from: .issues, maximumNumberOfPages: maximumNumberOfPages)
+            .filter { $0.pullRequest.mergedAt != nil }
+
+        return createChangelog(pulls: pulls)
+    }
+
     /// Generates the complete changelog by fetching all pull requests and all tags
     /// - Parameters:
     ///   - completion: will finish with a changelog string
@@ -134,7 +164,7 @@ public struct Generator {
 
     // MARK: Private
 
-    private func createChangelog(usingTags tags: [Tag] = [], pulls: [PullRequest]) -> String {
+    private func createChangelog(usingTags tags: [Tag] = [], pulls: [ChangelogConvertible]) -> String {
         var remainingTags = tags
 
         let expression = filterRegEx.flatMap {
@@ -201,11 +231,11 @@ public struct Generator {
 private struct ChangelogEntry {
     struct PullRequestGroup {
         let name: String
-        let pullRequests: [PullRequest]
+        let pullRequests: [ChangelogConvertible]
     }
 
     let tag: String?
-    var pullRequests: [PullRequest]
+    var pullRequests: [ChangelogConvertible]
 
     func groups(basedOn labels: [String]) -> [PullRequestGroup] {
         var pulls = pullRequests
