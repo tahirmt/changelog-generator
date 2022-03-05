@@ -1,4 +1,10 @@
 
+# v4
+------
+
+- [#50](https://github.com/tahirmt/changelog-generator/pull/50): Fetch using milestone by [tahirmt](https://github.com/tahirmt)
+- [#49](https://github.com/tahirmt/changelog-generator/pull/49): Support multiline changelog by [tahirmt](https://github.com/tahirmt)
+
 # v3
 ------
 
