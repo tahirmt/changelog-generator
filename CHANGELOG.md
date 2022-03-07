@@ -1,4 +1,10 @@
 
+# v4.1
+------
+
+- [#53](https://github.com/tahirmt/changelog-generator/pull/53): Fix bug with comparison url by [tahirmt](https://github.com/tahirmt)
+- [#52](https://github.com/tahirmt/changelog-generator/pull/52): Remove quotes from release by [tahirmt](https://github.com/tahirmt)
+
 # v4
 ------
 
