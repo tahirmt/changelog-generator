@@ -85,7 +85,7 @@ extension GitHub {
             ].joined(separator: "/")
         case .compare(let base, let head):
             return [
-                base,
+                self.base,
                 "repos",
                 repository,
                 endpoint.path,
@@ -178,6 +178,7 @@ extension GitHub {
     ///   - maximumNumberOfPages: The maximum number of pages to fetch
     func fetchComparison(from base: String, to head: String, maximumNumberOfPages: Int? = nil) async throws -> Comparison {
         let url: URL = try createBaseUrl(for: .compare(base, head))
+        Logger.log("Fetching comparison from \(url)")
         let fetcher = ComparisonFetcher(
             url: url,
             headers: headers,
