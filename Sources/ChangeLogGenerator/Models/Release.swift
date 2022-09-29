@@ -16,3 +16,9 @@ struct Release: Decodable {
     let publishedAt: Date?
     let draft: Bool
 }
+
+extension Release: UserReadable {
+    var userReadableString: String {
+        "Release: \(name)"
+    }
+}

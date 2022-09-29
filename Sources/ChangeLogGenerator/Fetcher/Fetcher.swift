@@ -1,6 +1,6 @@
 //
 //  Fetcher.swift
-//  
+//
 //
 //  Created by Mahmood Tahir on 2021-01-19.
 //
@@ -94,12 +94,17 @@ struct Fetcher<Data: Decodable> {
         }
 
         Logger.log(level: .verbose, "received")
-        Logger.log(level: .verbose, String(data: data, encoding: .utf8) ?? "")
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(.formatter)
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-        return try decoder.decode(Data.self, from: data)
+        let decodedValue = try decoder.decode(Data.self, from: data)
+
+        if let readableValue = decodedValue as? UserReadable {
+            Logger.log(level: .verbose, readableValue.userReadableString)
+        }
+
+        return decodedValue
     }
 }

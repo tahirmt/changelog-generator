@@ -11,3 +11,9 @@ struct Tag: Decodable, Equatable {
     let name: String
     let commit: Commit
 }
+
+extension Tag: UserReadable {
+    var userReadableString: String {
+        "Tag: \(name) \(commit.sha)"
+    }
+}

@@ -27,3 +27,9 @@ struct PullRequest: Decodable {
 }
 
 extension PullRequest: ChangelogConvertible {}
+
+extension PullRequest: UserReadable {
+    var userReadableString: String {
+        "Pull: \(title) (\(url)) \(mergeCommitSha ?? "")"
+    }
+}
