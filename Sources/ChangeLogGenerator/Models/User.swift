@@ -12,3 +12,9 @@ struct User: Decodable {
     let login: String
     let htmlUrl: URL
 }
+
+extension User: UserReadable {
+    var userReadableString: String {
+        "User: \(htmlUrl)"
+    }
+}

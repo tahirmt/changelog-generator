@@ -18,3 +18,9 @@ struct Milestone: Decodable {
     let closedIssues: UInt
     let state: State
 }
+
+extension Milestone: UserReadable {
+    var userReadableString: String {
+        "Milestone: \(title)"
+    }
+}

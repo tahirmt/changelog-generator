@@ -84,6 +84,7 @@ public struct Generator {
         guard let tag = tags.first(where: { $0.name == tag }) else {
             return ""
         }
+        Logger.log(level: .verbose, "Found tag \(tag)")
         var allTags = tags
         var filteredTags = [Tag]()
         while allTags.isEmpty == false && allTags[0] != tag {
@@ -95,11 +96,20 @@ public struct Generator {
                 pulls.contains { $0.mergeCommitSha == tag.commit.sha } == false
             }
             .filter { $0.mergedAt != nil }
+            .sorted {
+                $0.mergedAt! > $1.mergedAt! // we have already filtered out all the ones that have `mergedAt` as nil
+            }
 
         var allPulls = pullRequests
+        Logger.log(level: .verbose, "All pulls \(allPulls.userReadableString)")
         var filteredPulls = [PullRequest]()
-        while allPulls.isEmpty == false && allPulls[0].mergeCommitSha != tag.commit.sha {
+        while allPulls.isEmpty == false {
             filteredPulls.append(allPulls.removeFirst())
+
+            if allPulls[0].mergeCommitSha == tag.commit.sha {
+                // we have reached the merge commit. We no longer need to append more pull requests
+                break
+            }
         }
 
         if let branch = branch {
@@ -109,6 +119,8 @@ public struct Generator {
                                  to: branch,
                                  maximumNumberOfPages: maximumNumberOfPages)
 
+            Logger.log(level: .verbose, "comparison commits \(comparison.commits.userReadableString)")
+            Logger.log(level: .verbose, "Filtered pulls \(filteredPulls.userReadableString)")
 
             filteredPulls = filteredPulls.filter { pull in
                 comparison.commits.contains { $0.sha == pull.mergeCommitSha }

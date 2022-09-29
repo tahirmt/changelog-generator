@@ -28,3 +28,15 @@ struct FullCommit: Decodable {
     let sha: String
     let commit: Details
 }
+
+extension FullCommit: UserReadable {
+    var userReadableString: String {
+        "FullCommit: \(sha) \(commit.message)"
+    }
+}
+
+extension Commit: UserReadable {
+    var userReadableString: String {
+        "Commit: \(sha)"
+    }
+}

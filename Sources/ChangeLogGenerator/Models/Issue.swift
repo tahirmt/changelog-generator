@@ -30,3 +30,9 @@ extension Issue: ChangelogConvertible {
     // this information is not exposed through issues
     var mergeCommitSha: String? { nil }
 }
+
+extension Issue: UserReadable {
+    var userReadableString: String {
+        "Issue#\(id), (\(url))"
+    }
+}

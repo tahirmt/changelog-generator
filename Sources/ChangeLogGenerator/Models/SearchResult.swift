@@ -12,3 +12,13 @@ struct SearchResult<T: Decodable>: Decodable {
     let incompleteResults: Bool
     let items: [T]
 }
+
+extension SearchResult: UserReadable where T: UserReadable {
+    var userReadableString: String {
+        [
+            "Search Result: \(totalCount)",
+            items.userReadableString
+        ]
+            .joined()
+    }
+}

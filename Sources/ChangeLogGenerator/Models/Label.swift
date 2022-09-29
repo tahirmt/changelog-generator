@@ -12,3 +12,9 @@ struct Label: Decodable {
     let name: String
     let color: String
 }
+
+extension Label: UserReadable {
+    var userReadableString: String {
+        "Label: \(name)"
+    }
+}

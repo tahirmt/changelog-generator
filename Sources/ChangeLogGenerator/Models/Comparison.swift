@@ -17,3 +17,9 @@ struct Comparison: Decodable {
     let baseCommit: FullCommit
     let mergeBaseCommit: FullCommit
 }
+
+extension Comparison: UserReadable {
+    var userReadableString: String {
+        "Comparison: \(url)"
+    }
+}
