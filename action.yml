@@ -18,7 +18,7 @@ inputs:
   sinceLatestRelease:
     description: 'Can use this in place of since to get change log since the latest release'
     required: false
-  
+
   complete:
     description: 'Whether to generate the complete changelog. This is not recommended as it will fetch all tags and all pull requests. Complete and since cannot be used together.'
     required: false
@@ -31,11 +31,11 @@ inputs:
   filter:
     description: 'Filter regex. Matching PR titles will be ignored.'
     required: false
-  
+
   labels:
     description: 'Labels to group by'
     required: false
-  
+
   excludedLabels:
     description: 'The labels to exclude from the change log'
     required: false
@@ -52,7 +52,7 @@ inputs:
   verbose:
     description: 'Enable verbose logging'
     required: false
-  
+
   use-compiled:
     description: 'Whether to use compiled executable or not'
     required: false
@@ -146,7 +146,7 @@ runs:
         else
           command+=("--filter-reg-ex=$filter")
         fi
-        
+
         if [ -z "$labels" ]; then
           echo "labels is empty"
         else
@@ -175,8 +175,13 @@ runs:
 
         command+=("--log-console")
 
-        changelog=$("${command[@]}" | base64)
+        changelog="${command[@]}"
+
+        # Escape the special characters so that multiline output is supported
+        changelog="${changelog//'%'/'%25'}"
+        changelog="${changelog//$'\n'/'%0A'}"
+        changelog="${changelog//$'\r'/'%0D'}"
 
         echo "::set-output name=changelog::$changelog"
-      
+
       shell: bash
