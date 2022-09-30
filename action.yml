@@ -176,7 +176,7 @@ runs:
 
         command+=("--log-console")
 
-        changelog=$(${command[@]})
+        changelog=$("${command[@]}")
 
         # Add output to environment
 
