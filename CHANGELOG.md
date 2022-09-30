@@ -1,4 +1,9 @@
 
+# v4.3
+------
+
+- [#56](https://github.com/tahirmt/changelog-generator/pull/56): Support multiline output of changelog by [tahirmt](https://github.com/tahirmt)
+
 # v4.1
 ------
 
