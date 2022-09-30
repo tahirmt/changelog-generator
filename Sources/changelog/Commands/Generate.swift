@@ -1,6 +1,6 @@
 //
 //  Generate.swift
-//  
+//
 //
 //  Created by Mahmood Tahir on 2021-01-19.
 //
@@ -126,22 +126,22 @@ struct Generate: ParsableCommand {
                 let changelog: String
                 switch type {
                 case .complete:
-                    Logger.log("Fetch complete changelog")
+                    Logger.log(level: .verbose, "Fetch complete changelog")
                     changelog = try await generator.generateCompleteChangeLog()
                 case .sinceLatestRelease:
-                    Logger.log("Fetch since latest release")
+                    Logger.log(level: .verbose, "Fetch since latest release")
                     changelog = try await generator.generateChangeLogSinceLatestRelease(on: branch)
                 case .sinceTag:
                     guard let tag = tag else {
                         throw GenerateError.missingTag
                     }
-                    Logger.log("Fetch since \(tag)")
+                    Logger.log(level: .verbose, "Fetch since \(tag)")
                     changelog = try await generator.generateChangeLogSince(tag: tag, on: branch)
                 case .milestone:
                     guard let milestone = milestone else {
                         throw GenerateError.missingMilestone
                     }
-                    Logger.log("Fetch milestone \(milestone)")
+                    Logger.log(level: .verbose, "Fetch milestone \(milestone)")
                     changelog = try await generator.generateChangeLogFor(milestone: milestone)
                 }
 

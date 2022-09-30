@@ -61,12 +61,13 @@ inputs:
 outputs:
   changelog:
     description: the generated changelog
-    value: ${{ steps.generate.outputs.changelog }}
+    value: ${{ steps.set-output.outputs.changelog }}
 
 runs:
   using: "composite"
   steps:
-    - id: generate
+    - name: Generate
+      id: generate
       run: |
         repository="${{ github.repository }}"
         token="${{ inputs.token }}"
@@ -177,11 +178,19 @@ runs:
 
         changelog=$("${command[@]}")
 
-        # Escape the special characters so that multiline output is supported
-        changelog="${changelog//'%'/'%25'}"
-        changelog="${changelog//$'\n'/'%0A'}"
-        changelog="${changelog//$'\r'/'%0D'}"
+        # Add output to environment
 
-        echo "::set-output name=changelog::$changelog"
+        echo 'CHANGELOG_GENERATED_VALUE<<EOF' >> $GITHUB_ENV
+        echo "$changelog" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
 
       shell: bash
+
+    - name: Set output
+      id: set-output
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { CHANGELOG_GENERATED_VALUE } = process.env
+
+          core.setOutput('changelog', CHANGELOG_GENERATED_VALUE)
