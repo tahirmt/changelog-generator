@@ -1,4 +1,9 @@
 
+# v4.3.1
+------
+
+- [#58](https://github.com/tahirmt/changelog-generator/pull/58): Accidentally removed the command call instead of just removing base64 by [tahirmt](https://github.com/tahirmt)
+
 # v4.3
 ------
 
