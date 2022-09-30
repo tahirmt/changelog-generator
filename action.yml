@@ -175,7 +175,7 @@ runs:
 
         command+=("--log-console")
 
-        changelog="${command[@]}"
+        changelog=$("${command[@]}")
 
         # Escape the special characters so that multiline output is supported
         changelog="${changelog//'%'/'%25'}"
