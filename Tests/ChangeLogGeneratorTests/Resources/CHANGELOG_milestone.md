@@ -1,6 +1,5 @@
 
 # 4.0.0
-------
 
 - [#3752](https://github.com/AFNetworking/AFNetworking/pull/3752): Search for default pinned certificates in the main bundle by [0xced](https://github.com/0xced)
 - [#4246](https://github.com/AFNetworking/AFNetworking/pull/4246): Safely get mergedTasks On responseQueue by [bbeversdorf](https://github.com/bbeversdorf)

@@ -10,7 +10,6 @@
 - [#4562](https://github.com/AFNetworking/AFNetworking/pull/4562): Fix typo in CHANGELOG by [ElfSundae](https://github.com/ElfSundae)
 
 # 4.0.1
-------
 
 - [#4555](https://github.com/AFNetworking/AFNetworking/pull/4555): Prepare 4.0.1 Release by [jshier](https://github.com/jshier)
 - [#4553](https://github.com/AFNetworking/AFNetworking/pull/4553): Fix ServerTrustError crash. by [jshier](https://github.com/jshier)
@@ -29,7 +28,6 @@
 - [#4528](https://github.com/AFNetworking/AFNetworking/pull/4528): Improve podspec by [ElfSundae](https://github.com/ElfSundae)
 
 # 4.0.0
-------
 
 - [#4527](https://github.com/AFNetworking/AFNetworking/pull/4527): Prepare 4.0.0. by [jshier](https://github.com/jshier)
 - [#4523](https://github.com/AFNetworking/AFNetworking/pull/4523): AFNetworking 4 by [jshier](https://github.com/jshier)
@@ -91,7 +89,6 @@
 - [#4155](https://github.com/AFNetworking/AFNetworking/pull/4155): Update HTTPBin.org certificates. by [SlaunchaMan](https://github.com/SlaunchaMan)
 
 # 3.2.0
-------
 
 - [#4138](https://github.com/AFNetworking/AFNetworking/pull/4138): Use @available if available to silence a warning. by [SlaunchaMan](https://github.com/SlaunchaMan)
 - [#4122](https://github.com/AFNetworking/AFNetworking/pull/4122): Fix analyzer warning for upload task creation by [SlaunchaMan](https://github.com/SlaunchaMan)
