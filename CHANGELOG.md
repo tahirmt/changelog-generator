@@ -1,4 +1,9 @@
 
+# v4.3.3
+
+- [#62](https://github.com/tahirmt/changelog-generator/pull/62): Remove lines from changelogs by [tahirmt](https://github.com/tahirmt)
+- [#60](https://github.com/tahirmt/changelog-generator/pull/60): Remove extra logs by [tahirmt](https://github.com/tahirmt)
+
 # v4.3.1
 ------
 
