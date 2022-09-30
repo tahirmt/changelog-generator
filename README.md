@@ -13,7 +13,6 @@ You can use the precompiled executable `changelog` or ues `make` to create a new
 It procuces an output similar to below
 
 # 4.0.1
-------
 
 - [#4555](https://github.com/AFNetworking/AFNetworking/pull/4555): Prepare 4.0.1 Release by [jshier](https://github.com/jshier)
 - [#4553](https://github.com/AFNetworking/AFNetworking/pull/4553): Fix ServerTrustError crash. by [jshier](https://github.com/jshier)
@@ -22,7 +21,6 @@ It procuces an output similar to below
 
 
 # 4.0.0
-------
 
 - [#4527](https://github.com/AFNetworking/AFNetworking/pull/4527): Prepare 4.0.0. by [jshier](https://github.com/jshier)
 - [#4523](https://github.com/AFNetworking/AFNetworking/pull/4523): AFNetworking 4 by [jshier](https://github.com/jshier)

@@ -218,8 +218,7 @@ public struct Generator {
 
         changeLogEntries.forEach { entry in
             if let tag = entry.tag, entry.pullRequests.isEmpty == false {
-                lines.append("\n# \(tag)")
-                lines.append("------\n")
+                lines.append("\n# \(tag)\n")
             }
 
             let groups = entry.groups(basedOn: labels)
