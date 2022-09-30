@@ -51,8 +51,8 @@ When using the github action these are the inputs and outputs for the tool
 
 #### Outputs
 
-| Input | Description |
---- | --- | ---
+| Output | Description |
+| --- | --- |
 | changelog | The changelog generated during the run |
 
 #### Environment Variables
