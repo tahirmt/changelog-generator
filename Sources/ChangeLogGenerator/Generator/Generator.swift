@@ -75,7 +75,7 @@ public struct Generator {
     ///   - maximumNumberOfPages: maximum number of pages to load
     ///   - completion: will finish with a changelog string
     public func generateChangeLogSince(tag: String, on branch: String? = nil) async throws -> String {
-        Logger.log("generating since \(tag) on branch \(branch ?? "nil")")
+        Logger.log(level: .verbose, "generating since \(tag) on branch \(branch ?? "nil")")
         let tags = try await GitHub(repository: repository, token: token)
             .fetch(from: .tags, maximumNumberOfPages: maximumNumberOfPages) { (tags: [Tag]) -> Bool in
                 tags.contains { $0.name == tag } == false
