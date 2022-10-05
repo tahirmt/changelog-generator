@@ -60,7 +60,7 @@ public struct Generator {
             return try await generateChangeLogSince(tag: release.tagName, on: branch)
         }
         else {
-            Logger.log("Fetch pull requests since \(released)")
+            Logger.log(level: .verbose, "Fetch pull requests since \(released)")
             // fetch all pull requests since the release
             let pullRequests = try await GitHub(repository: repository, token: token)
                 .fetchPullRequests(mergedAfter: released, maximumNumberOfPages: maximumNumberOfPages)
