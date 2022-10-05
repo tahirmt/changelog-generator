@@ -1,4 +1,8 @@
 
+# v4.3.5
+
+- [#65](https://github.com/tahirmt/changelog-generator/pull/65): Move the fetch log to verbose by [tahirmt](https://github.com/tahirmt)
+
 
 # v4.3.3
 
