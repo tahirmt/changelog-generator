@@ -10,7 +10,7 @@ jobs:
     if: github.event.pull_request.merged == true && github.head_ref == 'create-release'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Get app version
       id: get-version
@@ -23,7 +23,7 @@ jobs:
         echo "::set-output name=tag::$tag"
 
     - name: Update tag
-      uses: richardsimko/update-tag@v1
+      uses: scoremedia/update-tag@v2
       with:
         tag_name: "${{ steps.get-version.outputs.tag }}"
       env:
@@ -52,7 +52,7 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: ncipollo/release-action@v1
+      uses: scoremedia/release-action@v2
       with:
         tag: "${{ steps.get-version.outputs.tag }}"
         body: |

@@ -20,12 +20,12 @@ jobs:
 
     steps:
     - name: Check Acccess
-      uses: sushichop/action-repository-permission@v1
+      uses: scoremedia/action-repository-permission@v2 
       with:
         required-permission: admin
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     
     - name: Create branch
       run: git checkout -b create-release
@@ -54,7 +54,7 @@ jobs:
         git push origin create-release --force 
     
     - name: Create PR
-      uses: peter-evans/create-pull-request@v3
+      uses: scorebet/create-pull-request@v5
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: create-release
